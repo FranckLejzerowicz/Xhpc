@@ -295,7 +295,8 @@ def write_out(args: dict) -> None:
                 if args['stat'] and part == 'commands':
                     line = '/usr/bin/time -v %s' % line_
                 o.write('%s\n' % line)
-            o.write('# ------ %s END ------\n' % part)
+            if part in args:
+                o.write('# ------ %s END ------\n' % part)
             o.write('\n')
         o.write('echo "Done!"\n')
         print('Written:', args['job_fp'])
