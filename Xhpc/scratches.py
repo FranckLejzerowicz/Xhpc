@@ -35,7 +35,7 @@ def edit_scratch(args: dict, scratch_fp: str, scratch: str) -> str:
     scratch_folder = get_first_line(scratch_fp)
     if args['config_scratch']:
         print("Registered %s: %s" % (scratch, scratch_folder))
-        scratch_folder = create_scratch(scratch_fp, scratch, True)
+        scratch_folder = create_scratch(args, scratch_fp, scratch)
     return scratch_folder
 
 
