@@ -41,9 +41,9 @@ def get_sinfo_pd(args: dict, sinfo_dir: str) -> None:
     # # -------------------------------------------------------------
     # # -----------               DELETE                  -----------
     # # -------------------------------------------------------------
-    import yaml
-    fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
-    return pd.read_csv(fp, sep='\t')
+    # import yaml
+    # fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
+    # return pd.read_csv(fp, sep='\t')
     # # -------------------------------------------------------------
     # # -------------------------------------------------------------
     if args['torque']:
