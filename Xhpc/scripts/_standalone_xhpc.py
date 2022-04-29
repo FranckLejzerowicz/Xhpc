@@ -17,10 +17,10 @@ from Xhpc import __version__
     "-i", "--i-script", nargs=1,
     help="Input script path (or double-quoted command)")
 @click.option(
-    "-j", "--i-job", required=True, type=str, help="Job name")
-@click.option(
     "-o", "--o-script", default=None, type=str,
     help="Output script path (default to <input>_<YYYY-MM-DD-HH-MM-SS>.slm)")
+@click.option(
+    "-j", "--i-job", required=True, type=str, help="Job name")
 @click.option(
     "-a", "--p-account", default=None, type=str, help="Name of the account")
 @click.option(
@@ -64,6 +64,9 @@ from Xhpc import __version__
     "-l", "--p-localscratch", type=int, show_default=False, default=None,
     help="Use localscratch with the provided memory amount (in GB)")
 @click.option(
+    "-y", "--p-include", multiple=True, default=None, show_default=True,
+    help="Folder to not move to and from scratch using rsync (must exist)")
+@click.option(
     "-x", "--p-exclude", multiple=True, default=None, show_default=True,
     help="Relative path(s) within input folder(s) to not move in scratch")
 @click.option(
@@ -73,6 +76,9 @@ from Xhpc import __version__
     "--userscratch/--no-userscratch", default=False, show_default=True,
     help="Use the userscratch folder to move files and compute")
 @click.option(
+    "--clear-scratch/--no-clear-scratch", default=True, show_default=True,
+    help="Whether to cleat the scratch area at the end of the job or not")
+@click.option(
     "--email/--no-email", default=False, show_default=True,
     help="Send email at job completion (always if fail)")
 @click.option(
@@ -81,6 +87,9 @@ from Xhpc import __version__
 @click.option(
     "--move/--no-move", default=False, show_default=True,
     help="Move files/folders to chosen scratch location")
+@click.option(
+    "--stat/--no-stat", default=True, show_default=True,
+    help="Whether to prepend `/usr/bin/time -v` to every script command")
 @click.option(
     "--verif/--no-verif", default=True, show_default=True,
     help="Print script to stdout and ask for 'y/n' user input to sanity check")
@@ -122,13 +131,16 @@ def standalone_xhpc(
         p_nodes,
         p_workdir,
         p_localscratch,
+        p_include,
         p_exclude,
         scratch,
         userscratch,
+        clear_scratch,
         email,
         run,
         move,
         verif,
+        stat,
         gpu,
         torque,
         config_email,
@@ -153,14 +165,17 @@ def standalone_xhpc(
         mem_per_cpu=p_mem_per_cpu,
         nodes=p_nodes,
         localscratch=p_localscratch,
+        include=p_include,
         exclude=p_exclude,
         scratch=scratch,
         userscratch=userscratch,
+        clear_scratch=clear_scratch,
         workdir=p_workdir,
         email=email,
         run=run,
         move=move,
         verif=verif,
+        stat=stat,
         gpu=gpu,
         torque=torque,
         config_email=config_email,

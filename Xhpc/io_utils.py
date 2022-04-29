@@ -41,9 +41,9 @@ def get_sinfo_pd(args: dict, sinfo_dir: str) -> None:
     # # -------------------------------------------------------------
     # # -----------               DELETE                  -----------
     # # -------------------------------------------------------------
-    # import yaml
-    # fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
-    # return pd.read_csv(fp, sep='\t')
+    import yaml
+    fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
+    return pd.read_csv(fp, sep='\t')
     # # -------------------------------------------------------------
     # # -------------------------------------------------------------
     if args['torque']:
@@ -255,11 +255,14 @@ def check_content(args: dict) -> None:
                 Commands composing the actual job
     """
     if args['verif']:
-        for section in ['directives', 'preamble', 'commands']:
-            print('------------------------%s' % ('-' * len(section)))
-            print("Please check the job's %s:" % section)
-            print('------------------------%s' % ('-' * len(section)))
-            for command in args[section]:
+        for part in ['directives', 'preamble', 'move_to',
+                     'commands', 'move_from', 'clear']:
+            if part not in args:
+                continue
+            print('------------------------%s' % ('-' * len(part)))
+            print("Please check the job's %s:" % part)
+            print('------------------------%s' % ('-' * len(part)))
+            for command in args[part]:
                 print(command)
             ret = input('\n\nContinue to write?: <[y]/n>\n')
             if ret == 'n':
@@ -281,11 +284,18 @@ def write_out(args: dict) -> None:
                 Commands composing the job's preamble
             commands : list
                 Commands composing the actual job
+            stat: bool
+                Whether to prepend `/usr/bin/time -v` to every script command
     """
     with open(args['job_fp'], 'w') as o:
-        for part in ['directives', 'preamble', 'in', 'commands', 'mv', 'out']:
-            for line in args[part]:
+        for part in ['directives', 'preamble', 'move_to',
+                     'commands', 'move_from', 'clear']:
+            for line_ in args[part]:
+                line = line_
+                if args['stat']:
+                    line = '/usr/bin/time -v %s' % line_
                 o.write('%s\n' % line)
             o.write('# ------ %s END ------\n' % part)
             o.write('\n')
         o.write('echo "Done!"\n')
+        print('Written:', args['job_fp'])

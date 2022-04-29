@@ -67,6 +67,10 @@ def xhpc(**args) -> None:
                 Path to user scratch folder (to move files and compute)
             localscratch: tuple
                 Use localscratch with the provided memory amount (in gb)
+            clear_scratch : bool
+                Whether to cleat the scratch area at the end of the job or not
+            include : tuple
+                Folder to not move to and from scratch using rsync (must exist)
             exclude : tuple
                 Relative path(s) within input folder(s) to not move in scratch
             email: bool
@@ -77,6 +81,8 @@ def xhpc(**args) -> None:
                 Move files/folders to chosen scratch location
             verif: bool
                 Print script to stdout and query user for sanity
+            stat: bool
+                Whether to prepend `/usr/bin/time -v` to every script command
             gpu: bool
                 Query a gpu (experimental)
             torque: bool
@@ -100,9 +106,9 @@ def xhpc(**args) -> None:
     get_directives(args)  # prepare job directives
     get_commands(args)  # get job command lines
     get_preamble(args)  # set environment and working directory
-    check_content(args)  # print-based, visual checks
     get_relocation(args)   # arrange file movement
     # write the psb file to provide to "qsub"
+    check_content(args)  # print-based, visual checks
     write_out(args)
     if args['run']:
         print('Launched command: /bin/sh %s' % args['job_fp'])

@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import itertools
+import os
 from os.path import dirname, isdir, isfile
 
 
@@ -61,26 +62,17 @@ def get_scratching_commands(args: dict) -> None:
         scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
 
         # Get commands to create and more to scratch directory
-        args['in'].append('\n# Define and create a scratch directory')
-        args['in'].append('SCRATCH_DIR="%s"' % scratch_path)
-        args['in'].append('mkdir -p ${SCRATCH_DIR}')
-        args['in'].append('cd ${SCRATCH_DIR}')
-        args['in'].append('echo Working directory is ${SCRATCH_DIR}')
-
-        # Get commands to move away and delete scratch directory
-        args['out'].append('\n# Move away and clear out the scratch directory')
-        if args['torque']:
-            args['out'].append('cd ${PBS_O_WORKDIR}')
-            args['out'].append('rm -rf ${SCRATCH_DIR}')
-        else:
-            args['out'].append('cd ${SLURM_SUBMIT_DIR}')
-            args['out'].append('rm -rf ${SCRATCH_DIR}')
+        args['move_to'].append('\n# Define and create a scratch directory')
+        args['move_to'].append('SCRATCH_DIR="%s"' % scratch_path)
+        args['move_to'].append('mkdir -p ${SCRATCH_DIR}')
+        args['move_to'].append('cd ${SCRATCH_DIR}')
+        args['move_to'].append('echo Working directory is ${SCRATCH_DIR}')
     else:
-        args['in'].append('\n# Define scratch directory as the working dir')
+        args['move_to'].append('\n# Define scratch directory as working dir')
         if args['torque']:
-            args['in'].append('SCRATCH_DIR=$PBS_O_WORKDIR')
+            args['move_to'].append('SCRATCH_DIR=$PBS_O_WORKDIR')
         else:
-            args['in'].append('SCRATCH_DIR=$SLURM_SUBMIT_DIR')
+            args['move_to'].append('SCRATCH_DIR=$SLURM_SUBMIT_DIR')
 
 
 def get_in_out(paths: set) -> dict:
@@ -108,14 +100,13 @@ def get_in_out(paths: set) -> dict:
     return in_out
 
 
-def get_min_files(in_out: dict, min_folders: set) -> set:
+def get_min_files(files: set, min_folders: set) -> set:
     """Reduce the set of files to those not already within the folders.
 
     Parameters
     ----------
-    in_out : dict
-        Sets of existing files and folder that will be moved in and
-        of non-existing paths that will be move back.
+    files : set
+        Sets of existing files that will be moved in scratch
     min_folders : set
         Keep the most basal of the existing folders passed in command
 
@@ -125,7 +116,7 @@ def get_min_files(in_out: dict, min_folders: set) -> set:
         Files not present with the minimum set of folders
     """
     min_files = set()
-    for f1 in in_out['files']:
+    for f1 in files:
         for f2 in min_folders:
             if f2 in dirname(f1):
                 break
@@ -134,31 +125,81 @@ def get_min_files(in_out: dict, min_folders: set) -> set:
     return min_files
 
 
-def get_min_folders(in_out: dict) -> set:
+def get_min_folders(folders: set, included: set) -> set:
     """Reduce the set of folder to that which is most basal so that
 
     Parameters
     ----------
-    in_out : dict
-        Sets of existing files and folder that will be moved in and
-        of non-existing paths that will be move back.
+    folders : set
+        Sets of existing folder that will be moved in scratch
+    included : set
+        Paths to the folders that the user passed to option `--p-include`
 
     Returns
     -------
     min_folders : set
         Minimum set of existing folders to contain all folders passed in command
     """
-    folders = in_out['folders']
+    # Get the folders entailed within others (so that these need not be moved
+    # specifically, they will be moved as being within these "others")
     min_folders, exclude = set(), set()
     for f1, f2 in itertools.combinations(sorted(folders), 2):
         if f1 != f2 and f1 in f2:
             exclude.add(f2)
+
+    # Expand the collection of folders with those entailed within the
+    # folders passed to option `--p-include` (same reason)
+    for f1 in folders:
+        for f2 in included:
+            if f2 in f1:
+                exclude.add(f1)
+
+    # Actual reduction to remove all folders contained within a broader path
     min_folders = folders.difference(exclude)
     return min_folders
 
 
+def get_include_commands(args: dict) -> set:
+    """Get the "--include" option for the rsync command to exclude files
+    and/or folder provided b the user.
+
+    Parameters
+    ----------
+    args : dict
+        All arguments, including:
+            include : tuple
+                Folder to not move to and from scratch using rsync (must exist)
+
+    Returns
+    -------
+    included : set
+        Paths to the folders that the user passed to option `--p-include`
+    """
+    included = set()
+    if args['include']:
+        m_to = []
+        m_from = []
+        for folder_ in args['include']:
+            if not isdir(folder_):
+                continue
+            folder = os.path.abspath(folder_)
+            included.add(folder)
+            scratch = '${SCRATCH_DIR}%s' % folder
+            m_to.extend(['mkdir -p %s' % dirname(scratch),
+                         'rsync -aqru %s/ %s' % (folder, scratch)])
+            m_from.extend(['mkdir -p %s' % folder,
+                           'rsync -aqru %s/ %s' % (scratch, folder)])
+        if m_to:
+            args['move_to'].append('\n# Include command (move to scratch)')
+            args['move_to'].extend(m_to)
+        if m_from:
+            args['move_from'].append('\n# Include command (move from scratch)')
+            args['move_from'].extend(m_from)
+    return included
+
+
 def get_exclude(args: dict) -> str:
-    """Get the "--exclude" option of the rsync command to exclude files
+    """Get the "--exclude" option for the rsync command to exclude files
     and/or folder provided b the user.
 
     Parameters
@@ -181,7 +222,7 @@ def get_exclude(args: dict) -> str:
     return exclude
 
 
-def move_in(path: str, is_folder: bool, exclude: str = '') -> list:
+def move_to(path: str, is_folder: bool, exclude: str = '') -> list:
     """
 
     Parameters
@@ -209,7 +250,7 @@ def move_in(path: str, is_folder: bool, exclude: str = '') -> list:
     return move
 
 
-def get_min_paths(in_out: dict) -> dict:
+def get_min_paths(in_out: dict, included: set) -> dict:
     """Get the minimum set of folders and files to move to scratch.
 
     Parameters
@@ -217,6 +258,8 @@ def get_min_paths(in_out: dict) -> dict:
     in_out : dict
         Sets of existing files and folder that will be moved in and
         of non-existing paths that will be move back.
+    included : set
+        Paths to the folders that the user passed to option `--p-include`
 
     Returns
     -------
@@ -225,8 +268,8 @@ def get_min_paths(in_out: dict) -> dict:
         command (key "folders") and files not present with the minimum set of
         folders (key "files")
     """
-    min_folders = get_min_folders(in_out)
-    min_files = get_min_files(in_out, min_folders)
+    min_folders = get_min_folders(in_out['folders'], included)
+    min_files = get_min_files(in_out['files'], min_folders)
     min_paths = {'folders': min_folders, 'files': min_files}
     return min_paths
 
@@ -243,12 +286,10 @@ def get_in_commands(args: dict, min_paths: dict, exclude: str = '') -> None:
     exclude : str
         Exclude command with the requested file and folder paths
     """
-    # folders
     for min_folder in min_paths['folders']:
-        args['in'].extend(move_in(min_folder, True, exclude))
-    # files
+        args['move_to'].extend(move_to(min_folder, True, exclude))
     for min_file in min_paths['files']:
-        args['in'].extend(move_in(min_file, False))
+        args['move_to'].extend(move_to(min_file, False))
 
 
 def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
@@ -266,23 +307,18 @@ def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
         Sets of existing files and folder that will be moved in and
         of non-existing paths that will be move back.
     """
-    move = list()
     for folder in min_paths['folders']:
         source = '${SCRATCH_DIR}%s' % folder
-        move.extend([
+        args['move_from'].extend([
             'mkdir -p %s' % folder,
-            'rsync -auqr %s/ %s; fi' % (source, folder)
-        ])
-
+            'rsync -auqr %s/ %s; fi' % (source, folder)])
     for path in in_out['out']:
         source = '${SCRATCH_DIR}%s' % path
-        move.append(
+        args['move_from'].extend([
             'if [ -d %s ]; then mkdir -p %s; rsync -auqr %s/ %s; fi' % (
-                source, path, source, path))
-        move.append(
+                source, path, source, path),
             'if [ -f %s ]; then rsync -auqr %s %s; fi' % (
-                source, source, path))
-    args['mv'] = move
+                source, source, path)])
 
 
 def get_relocating_commands(args: dict) -> None:
@@ -295,13 +331,42 @@ def get_relocating_commands(args: dict) -> None:
             paths : set
                 Paths to file or folders to move when using scratch folder
     """
-    # Move in to scratch
+    # Folders to move to and from scratch
+    included = get_include_commands(args)
+    # Folders not to move to scratch
     exclude = get_exclude(args)
+
+    # Get paths to existing folders and files, and non-existing ones (outputs?)
     in_out = get_in_out(args['paths'])
-    min_paths = get_min_paths(in_out)
+    min_paths = get_min_paths(in_out, included)
+
+    # Move in to scratch
     get_in_commands(args, min_paths, exclude)
     # Move out from scratch
     get_out_commands(args, min_paths, in_out)
+
+
+def get_clearing_commands(args: dict):
+    """Collect all the commands that clear the scratch location.
+
+    Parameters
+    ----------
+    args : dict
+        All arguments.
+            clear_scratch : bool
+                Whether to cleat the scratch area at the end of the job or not
+            torque: bool
+                Adapt to Torque
+    """
+    if args['clear_scratch']:
+        # Get commands to move away and delete scratch directory
+        args['clear'].append('\n# Move away and clear the scratch area')
+        if args['torque']:
+            args['clear'].append('cd ${PBS_O_WORKDIR}')
+            args['clear'].append('rm -rf ${SCRATCH_DIR}')
+        else:
+            args['clear'].append('cd ${SLURM_SUBMIT_DIR}')
+            args['clear'].append('rm -rf ${SCRATCH_DIR}')
 
 
 def go_to_work(args: dict) -> None:
@@ -314,12 +379,12 @@ def go_to_work(args: dict) -> None:
             torque: bool
                 Adapt to Torque
     """
-    args['in'] = ['# Move to the working directory and say it']
+    args['move_to'] = ['# Move to the working directory and say it']
     work_dir = 'SLURM_SUBMIT_DIR'
     if args['torque']:
         work_dir = 'PBS_O_WORKDIR'
-    args['in'].append('cd $%s' % work_dir)
-    args['in'].append('echo Working directory is $%s' % work_dir)
+    args['move_to'].append('cd $%s' % work_dir)
+    args['move_to'].append('echo Working directory is $%s' % work_dir)
 
 
 def get_relocation(args: dict) -> None:
@@ -332,21 +397,19 @@ def get_relocation(args: dict) -> None:
     ----------
     args : dict
         All arguments, including:
-            scratch: str
-                Path to scratch folder (to move files and compute)
-            userscratch: str
-                Path to user scratch folder (to move files and compute)
-            localscratch: tuple
-                Use localscratch with the provided memory amount (in gb)
+            move : bool
+                Move files/folders to chosen scratch location
     """
+    args['move_to'] = []
+    args['clear'] = []
+    args['move_from'] = []
     if args['move']:
-        args['in'] = []
-        args['out'] = []
-        args['mv'] = []
         # Get scratch folder creation and deletion commands
         get_scratching_commands(args)
         # Get command that move the inputs in and outputs out
         get_relocating_commands(args)
+        # Get command that clear the scratch location
+        get_clearing_commands(args)
     else:
         # Switch to working directory; default is home directory
         go_to_work(args)

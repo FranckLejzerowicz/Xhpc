@@ -17,14 +17,15 @@ class TestGetNodesPpn(unittest.TestCase):
     def setUp(self) -> None:
         self.args = {
             'job_id': 'X',
+            'include': None,
             'exclude': None,
             'localscratch': None,
             'userscratch': False,
             'scratch': False,
             'torque': False,
-            'in': [],
-            'out': [],
-            'mv': []
+            'move_to': [],
+            'move_from': [],
+            'clear': []
         }
         self.not_existing = ['%s/n1' % test_folder, '%s/n2.txt' % test_folder]
         self.folders = ['%s/d1' % test_folder, '%s/d2' % test_folder]
@@ -55,16 +56,46 @@ class TestGetNodesPpn(unittest.TestCase):
 
     def test_get_scratching_commands_noscratch_slurm(self):
         get_scratching_commands(self.args)
-        exp = ['\n# Define scratch directory as the working dir',
+        exp = ['\n# Define scratch directory as working dir',
                'SCRATCH_DIR=$SLURM_SUBMIT_DIR']
-        self.assertEqual(exp, self.args['in'])
+        self.assertEqual(exp, self.args['move_to'])
 
     def test_get_scratching_commands_noscratch_torque(self):
         self.args['torque'] = True
         get_scratching_commands(self.args)
-        exp = ['\n# Define scratch directory as the working dir',
+        exp = ['\n# Define scratch directory as working dir',
                'SCRATCH_DIR=$PBS_O_WORKDIR']
-        self.assertEqual(exp, self.args['in'])
+        self.assertEqual(exp, self.args['move_to'])
+
+    def test_get_scratching_commands_local(self):
+        self.args['localscratch'] = '/localscratch:10GB'
+        get_scratching_commands(self.args)
+        exp = ['\n# Define and create a scratch directory',
+               'SCRATCH_DIR="/localscratch:10GB/${X}"',
+               'mkdir -p ${SCRATCH_DIR}',
+               'cd ${SCRATCH_DIR}',
+               'echo Working directory is ${SCRATCH_DIR}']
+        self.assertEqual(exp, self.args['move_to'])
+
+    def test_get_scratching_commands_user(self):
+        self.args['userscratch'] = '/some/path'
+        get_scratching_commands(self.args)
+        exp = ['\n# Define and create a scratch directory',
+               'SCRATCH_DIR="/some/path/${X}"',
+               'mkdir -p ${SCRATCH_DIR}',
+               'cd ${SCRATCH_DIR}',
+               'echo Working directory is ${SCRATCH_DIR}']
+        self.assertEqual(exp, self.args['move_to'])
+
+    def test_get_scratching_commands(self):
+        self.args['scratch'] = '/some/path'
+        get_scratching_commands(self.args)
+        exp = ['\n# Define and create a scratch directory',
+               'SCRATCH_DIR="/some/path/${X}"',
+               'mkdir -p ${SCRATCH_DIR}',
+               'cd ${SCRATCH_DIR}',
+               'echo Working directory is ${SCRATCH_DIR}']
+        self.assertEqual(exp, self.args['move_to'])
 
     def test_get_in_out(self):
         obs = get_in_out(self.set)
@@ -75,19 +106,27 @@ class TestGetNodesPpn(unittest.TestCase):
         self.assertEqual(exp, obs)
 
     def test_get_min_files(self):
-        in_out = {'files': {
-            '/a/b/c/d/e.txt', '/a/b/c/d.txt', '/a/b/c.txt', '/1/2.txt', '/1.txt'
-        }}
+        files = {
+            '/a/b/c/d/e.txt',
+            '/a/b/c/d.txt',
+            '/a/b/c.txt',
+            '/1/2.txt',
+            '/1.txt'
+        }
         min_folders = {'/a/b/c', '/1'}
-        obs = get_min_files(in_out, min_folders)
+        obs = get_min_files(files, min_folders)
         exp = {'/a/b/c.txt', '/1.txt'}
         self.assertEqual(exp, obs)
 
     def test_get_min_folders(self):
-        in_out = {'folders': {
-            '/a/b/c/d/e', '/a/b/c/d', '/a/b/c', '/1/2/3/4/5', '/1'
-        }}
-        obs = get_min_folders(in_out)
+        folders = {
+            '/a/b/c/d/e',
+            '/a/b/c/d',
+            '/a/b/c',
+            '/1/2/3/4/5',
+            '/1'
+        }
+        obs = get_min_folders(folders, set())
         exp = {'/a/b/c', '/1'}
         self.assertEqual(exp, obs)
 
@@ -99,6 +138,31 @@ class TestGetNodesPpn(unittest.TestCase):
         obs = get_exclude(self.args)
         exp = "/ --exclude={'/some/file','/some/dir'}"
         self.assertEqual(exp, obs)
+
+    def test_get_include_commands(self):
+        obs = get_include_commands(self.args)
+        exp = set()
+        self.assertEqual(exp, obs)
+
+        self.args['include'] = ('./a', './1/2/3',)
+        obs = get_include_commands(self.args)
+        self.assertEqual(exp, obs)
+
+        os.makedirs('./a')
+        path = os.path.abspath('./a')
+        self.args['include'] = ('./a', './1/2/3',)
+        obs = get_include_commands(self.args)
+        self.assertEqual({path}, obs)
+        path_dir = dirname(path)
+        exp = ['\n# Include command (move to scratch)',
+               'mkdir -p ${SCRATCH_DIR}%s' % path_dir,
+               'rsync -aqru %s/ ${SCRATCH_DIR}%s' % (path, path)]
+        self.assertEqual(exp, self.args['move_to'])
+        exp = ['\n# Include command (move from scratch)',
+               'mkdir -p %s' % path,
+               'rsync -aqru ${SCRATCH_DIR}%s/ %s' % (path, path)]
+        self.assertEqual(exp, self.args['move_from'])
+        os.rmdir('./a')
 
     # def test_move_in(self):
     #     move_in()
