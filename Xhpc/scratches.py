@@ -88,7 +88,7 @@ def create_scratch(args: dict, scratch_fp: str, scratch: str) -> str:
     if args['config_scratch']:
         scratch_folder = get_scratch(scratch)
     elif scratch == 'userscratch' and 'USERWORK' in os.environ:
-        scratch_folder = 'USERWORK'
+        scratch_folder = '${USERWORK}'
     else:
         scratch_folder = get_scratch(scratch)
     write_scratches(scratch_fp, scratch_folder)
@@ -154,5 +154,5 @@ def write_scratches(scratch_fp: str, scratch_folder: str) -> None:
     with open(scratch_fp, 'w') as o:
         o.write('%s\n' % scratch_folder)
     print('Written: %s' % scratch_fp)
-    if scratch_folder == 'USERNAME':
+    if scratch_folder == '${USERWORK}':
         print('(written automatically since your machine presets USERNAME)')
