@@ -255,7 +255,7 @@ def check_content(args: dict) -> None:
                 Commands composing the actual job
     """
     if args['verif']:
-        for part in ['directives', 'preamble', 'move_to',
+        for part in ['directives', 'preamble', 'mkdir', 'move_to',
                      'commands', 'move_from', 'clear']:
             if part not in args:
                 continue
@@ -288,7 +288,7 @@ def write_out(args: dict) -> None:
                 Whether to prepend `/usr/bin/time -v` to every script command
     """
     with open(args['job_fp'], 'w') as o:
-        for part in ['directives', 'preamble', 'move_to',
+        for part in ['directives', 'preamble', 'mkdir', 'move_to',
                      'commands', 'move_from', 'clear']:
             for line_ in args[part]:
                 line = line_

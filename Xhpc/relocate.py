@@ -185,10 +185,10 @@ def get_include_commands(args: dict) -> set:
             folder = os.path.abspath(folder_)
             included.add(folder)
             scratch = '${SCRATCH_DIR}%s' % folder
-            m_to.extend(['mkdir -p %s' % dirname(scratch),
-                         'rsync -aqru %s/ %s' % (folder, scratch)])
-            m_from.extend(['mkdir -p %s' % folder,
-                           'rsync -aqru %s/ %s' % (scratch, folder)])
+            args['mkdir'].update(['mkdir -p %s' % dirname(scratch),
+                                  'mkdir -p %s' % folder])
+            m_to.append('rsync -aqru %s/ %s' % (folder, scratch))
+            m_from.append('rsync -aqru %s/ %s' % (scratch, folder))
         if m_to:
             args['move_to'].append('\n# Include command (move to scratch)')
             args['move_to'].extend(m_to)
@@ -222,11 +222,13 @@ def get_exclude(args: dict) -> str:
     return exclude
 
 
-def move_to(path: str, is_folder: bool, exclude: str = '') -> list:
+def move_to(args: dict, path: str, is_folder: bool, exclude: str = '') -> list:
     """
 
     Parameters
     ----------
+    args : dict
+        All arguments.
     path : str
         A folder or a file to move to scratch
     is_folder : bool
@@ -243,10 +245,8 @@ def move_to(path: str, is_folder: bool, exclude: str = '') -> list:
     if is_folder:
         source += '/'
     destination = '${SCRATCH_DIR}%s' % path
-    move = [
-        'mkdir -p %s' % dirname(destination),
-        'rsync -aqru %s %s%s' % (source, destination, exclude)
-    ]
+    args['mkdir'].add('mkdir -p %s' % dirname(destination))
+    move = ['rsync -aqru %s %s%s' % (source, destination, exclude)]
     return move
 
 
@@ -287,9 +287,9 @@ def get_in_commands(args: dict, min_paths: dict, exclude: str = '') -> None:
         Exclude command with the requested file and folder paths
     """
     for min_folder in min_paths['folders']:
-        args['move_to'].extend(move_to(min_folder, True, exclude))
+        args['move_to'].extend(move_to(args, min_folder, True, exclude))
     for min_file in min_paths['files']:
-        args['move_to'].extend(move_to(min_file, False))
+        args['move_to'].extend(move_to(args, min_file, False))
 
 
 def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
@@ -309,9 +309,8 @@ def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
     """
     for folder in min_paths['folders']:
         source = '${SCRATCH_DIR}%s' % folder
-        args['move_from'].extend([
-            'mkdir -p %s' % folder,
-            'rsync -auqr %s/ %s; fi' % (source, folder)])
+        args['mkdir'].add('mkdir -p %s' % folder)
+        args['move_from'].append('rsync -auqr %s/ %s; fi' % (source, folder))
     for path in in_out['out']:
         source = '${SCRATCH_DIR}%s' % path
         args['move_from'].extend([
@@ -400,9 +399,10 @@ def get_relocation(args: dict) -> None:
             move : bool
                 Move files/folders to chosen scratch location
     """
+    args['mkdir'] = set()
     args['move_to'] = []
-    args['clear'] = []
     args['move_from'] = []
+    args['clear'] = []
     if args['move']:
         # Get scratch folder creation and deletion commands
         get_scratching_commands(args)
