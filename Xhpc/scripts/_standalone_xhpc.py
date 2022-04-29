@@ -61,14 +61,14 @@ from Xhpc import __version__
     "-w", "--p-workdir", default=None, show_default=True,
     help="Working directory to use instead of $SLURM_SUBMIT_DIR")
 @click.option(
-    "-l", "--p-localscratch", type=int, show_default=False, default=None,
-    help="Use localscratch with the provided memory amount (in GB)")
-@click.option(
     "-y", "--p-include", multiple=True, default=None, show_default=True,
     help="Folder to not move to and from scratch using rsync (must exist)")
 @click.option(
     "-x", "--p-exclude", multiple=True, default=None, show_default=True,
     help="Relative path(s) within input folder(s) to not move in scratch")
+@click.option(
+    "-l", "--localscratch", type=int, show_default=False, default=None,
+    help="Use localscratch with the provided memory amount (in GB)")
 @click.option(
     "--scratch/--no-scratch", default=False, show_default=True,
     help="Use the scratch folder to move files and compute")
@@ -130,9 +130,9 @@ def standalone_xhpc(
         p_mem_per_cpu,
         p_nodes,
         p_workdir,
-        p_localscratch,
         p_include,
         p_exclude,
+        localscratch,
         scratch,
         userscratch,
         clear_scratch,
@@ -164,10 +164,10 @@ def standalone_xhpc(
         mem=p_mem,
         mem_per_cpu=p_mem_per_cpu,
         nodes=p_nodes,
-        localscratch=p_localscratch,
         include=p_include,
         exclude=p_exclude,
         scratch=scratch,
+        localscratch=localscratch,
         userscratch=userscratch,
         clear_scratch=clear_scratch,
         workdir=p_workdir,
