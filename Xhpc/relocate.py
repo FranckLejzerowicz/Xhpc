@@ -62,17 +62,17 @@ def get_scratching_commands(args: dict) -> None:
         scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
 
         # Get commands to create and more to scratch directory
-        args['move_to'].append('\n# Define and create a scratch directory')
-        args['move_to'].append('SCRATCH_DIR="%s"' % scratch_path)
-        args['move_to'].append('mkdir -p ${SCRATCH_DIR}')
-        args['move_to'].append('cd ${SCRATCH_DIR}')
-        args['move_to'].append('echo Working directory is ${SCRATCH_DIR}')
+        args['scratching'].append('\n# Define and create a scratch directory')
+        args['scratching'].append('SCRATCH_DIR="%s"' % scratch_path)
+        args['scratching'].append('mkdir -p ${SCRATCH_DIR}')
+        args['scratching'].append('cd ${SCRATCH_DIR}')
+        args['scratching'].append('echo Working directory is ${SCRATCH_DIR}')
     else:
-        args['move_to'].append('\n# Define scratch directory as working dir')
+        args['scratching'].append('\n# Define scratch directory as working dir')
         if args['torque']:
-            args['move_to'].append('SCRATCH_DIR=$PBS_O_WORKDIR')
+            args['scratching'].append('SCRATCH_DIR=$PBS_O_WORKDIR')
         else:
-            args['move_to'].append('SCRATCH_DIR=$SLURM_SUBMIT_DIR')
+            args['scratching'].append('SCRATCH_DIR=$SLURM_SUBMIT_DIR')
 
 
 def get_in_out(paths: set) -> dict:
@@ -399,6 +399,7 @@ def get_relocation(args: dict) -> None:
             move : bool
                 Move files/folders to chosen scratch location
     """
+    args['scratching'] = []
     args['mkdir'] = set()
     args['move_to'] = []
     args['move_from'] = []
