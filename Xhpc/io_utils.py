@@ -292,7 +292,7 @@ def write_out(args: dict) -> None:
                      'commands', 'move_from', 'clear']:
             for line_ in args[part]:
                 line = line_
-                if args['stat']:
+                if args['stat'] and part == 'commands':
                     line = '/usr/bin/time -v %s' % line_
                 o.write('%s\n' % line)
             o.write('# ------ %s END ------\n' % part)
