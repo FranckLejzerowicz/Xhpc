@@ -35,7 +35,7 @@ def edit_scratch(args: dict, scratch_fp: str, scratch: str) -> str:
     scratch_folder = get_first_line(scratch_fp)
     if args['config_scratch']:
         print("Registered %s: %s" % (scratch, scratch_folder))
-        scratch_folder = create_scratch(scratch_fp, scratch)
+        scratch_folder = create_scratch(scratch_fp, scratch, True)
     return scratch_folder
 
 
@@ -62,15 +62,19 @@ def get_scratches(args: dict, config_dir: str) -> None:
             if isfile(scratch_fp):
                 args[scratch] = edit_scratch(args, scratch_fp, scratch)
             else:
-                args[scratch] = create_scratch(scratch_fp, scratch)
+                args[scratch] = create_scratch(args, scratch_fp, scratch)
 
 
-def create_scratch(scratch_fp: str, scratch: str) -> str:
+def create_scratch(args: dict, scratch_fp: str, scratch: str) -> str:
     """Collect the scratch folders interactively from the user
     and write it somewhere it can be reused.
 
     Parameters
     ----------
+    args : dict
+        All arguments. Here only the following key is of interest:
+            config_scratch : bool
+                Show current scratches folder and/or edit it
     scratch_fp : str
         Path to the file containing the scratch folder
     scratch : str
@@ -81,7 +85,9 @@ def create_scratch(scratch_fp: str, scratch: str) -> str:
     scratch_folder : str
         Scratch folder
     """
-    if scratch == 'userscratch' and 'USERWORK' in os.environ:
+    if args['config_scratch']:
+        scratch_folder = get_scratch(scratch)
+    elif scratch == 'userscratch' and 'USERWORK' in os.environ:
         scratch_folder = 'USERWORK'
     else:
         scratch_folder = get_scratch(scratch)
@@ -148,3 +154,5 @@ def write_scratches(scratch_fp: str, scratch_folder: str) -> None:
     with open(scratch_fp, 'w') as o:
         o.write('%s\n' % scratch_folder)
     print('Written: %s' % scratch_fp)
+    if scratch_folder == 'USERNAME':
+        print('(written automatically since your machine presets USERNAME)')

@@ -74,7 +74,7 @@ def get_nodes_ppn(args: dict) -> str:
     else:
         if nnodes > 1 and ncpus > 1:
             directive = '#SBATCH --nodes=%s' % nnodes
-            directive += '#SBATCH --ntasks-per-node=%s' % ncpus
+            directive += '\n#SBATCH --ntasks-per-node=%s' % ncpus
         elif nnodes > 1:
             directive = '#SBATCH --nodes=%s' % nnodes
         elif ncpus > 1:
