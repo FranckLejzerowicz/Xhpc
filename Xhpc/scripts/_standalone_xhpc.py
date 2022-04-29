@@ -91,7 +91,7 @@ from Xhpc import __version__
     "--stat/--no-stat", default=True, show_default=True,
     help="Whether to prepend `/usr/bin/time -v` to every script command")
 @click.option(
-    "--verif/--no-verif", default=True, show_default=True,
+    "--verif/--no-verif", default=False, show_default=True,
     help="Print script to stdout and ask for 'y/n' user input to sanity check")
 @click.option(
     "--gpu/--no-gpu", default=False, show_default=True,
