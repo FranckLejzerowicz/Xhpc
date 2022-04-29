@@ -139,10 +139,12 @@ def run_sinfo_subprocess() -> bytes:
     fmt += 'Memory:12,'
     fmt += 'FreeMem:12'
     cmd = ['sinfo', '--Node', '-h', '-O', fmt]
-    print(' '.join(cmd))
     # run sinfo and get the stdout
     sinfo_stdout, stderr = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+        ' '.join(cmd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True
     ).communicate()
     if stderr:
         raise FileNotFoundError('Using Slurm? `sinfo` command not found')
