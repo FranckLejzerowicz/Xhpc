@@ -238,7 +238,8 @@ def set_memory(args: dict) -> str:
             directive = '#PBS -l mem=%s' % (''.join(args[mem])).lower()
         else:
             num, byt = args[mem]
-            directive = '#SBATCH --%s=%s%s' % (mem, num, byt.upper())
+            directive = '#SBATCH --%s=%s%s' % (
+                mem.replace('_', '-'), num, byt.upper())
         return directive
 
 
