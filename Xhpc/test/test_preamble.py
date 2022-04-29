@@ -170,34 +170,22 @@ class TestAddEchoes(unittest.TestCase):
         self.part1 = ['\n# echo some info about the job',
                       'echo Running on host `hostname`',
                       'echo Time is `date`', 'echo Directory is `pwd`']
-        self.part2 = ["echo Temporary directory is $TMPDIR"]
         self.slurm = ['NPROCS=`wc -l < $SLURM_JOB_NODELIST`',
                       'NNODES=`uniq $SLURM_JOB_NODELIST | wc -l`']
         self.torque = ['NPROCS=`wc -l < $PBS_NODEFILE`',
                        'NNODES=`uniq $PBS_NODEFILE | wc -l`']
-        self.part3 = ['echo Use ${NPROCS} procs on ${NNODES} nodes',
+        self.part2 = ['echo Use ${NPROCS} procs on ${NNODES} nodes',
                       'echo Job stdout is X.o', 'echo Job stderr is X.e']
 
     def test_add_echoes_notmp_slurm(self):
-        exp = self.part1 + self.part2 + self.slurm + self.part3
-        add_echoes(self.args, False)
+        exp = self.part1 + self.slurm + self.part2
+        add_echoes(self.args)
         self.assertEqual(self.args['preamble'], exp)
 
     def test_add_echoes_notmp_torque(self):
         self.args['torque'] = True
-        exp = self.part1 + self.part2 + self.torque + self.part3
-        add_echoes(self.args, False)
-        self.assertEqual(self.args['preamble'], exp)
-
-    def test_add_echoes_tmp_slurm(self):
-        exp = self.part1 + self.slurm + self.part3
-        add_echoes(self.args, True)
-        self.assertEqual(self.args['preamble'], exp)
-
-    def test_add_echoes_tmp_torque(self):
-        self.args['torque'] = True
-        exp = self.part1 + self.torque + self.part3
-        add_echoes(self.args, True)
+        exp = self.part1 + self.torque + self.part2
+        add_echoes(self.args)
         self.assertEqual(self.args['preamble'], exp)
 
 

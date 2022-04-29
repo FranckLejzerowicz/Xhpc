@@ -237,6 +237,51 @@ def get_first_line(path: str) -> str:
     return ret
 
 
+def get_tmpdir(args: dict) -> bool:
+    """Define the path to a temporary folder depending on the user options
+    such as the use of scratch or localscratch, or on the presence of an
+    already existing TMPDIR folder, or on whether the user specified a tmp
+    folder to use. It creates the folder and export an environment variable
+    TMPDIR for it.
+
+    Parameters
+    ----------
+    args : dict
+        All arguments. Here only the following keys are of interest:
+            tmp: str
+                Alternative temp folder
+            workdir: str
+                Working directory
+            move : bool
+                Move files/folders to chosen scratch location
+            torque: bool
+                Adapt to Torque
+    """
+    # define the temporary folder
+    if args['tmp']:
+        tmpdir = args['tmp'].rstrip('/')
+    elif args['move']:
+        # if this is set, then there will be a SCRATCH_DIR folder created
+        tmpdir = '${SCRATCH_DIR}/tmpdir'
+    elif 'TMPDIR' in os.environ:
+        tmpdir = '${TMPDIR}'
+    else:
+        return None  # if no TMPDIR is set, keep the default machine behavior
+
+    tmpdir += '/' + args['job']
+    if args['torque']:
+        tmpdir += '_${PBS_JOBID}'
+    else:
+        tmpdir += '_${SLURM_JOB_ID}'
+
+    # set command to create the temporary folder
+    args['tmp'] = [
+        '\n# create and export the temporary directory',
+        'mkdir -p %s' % tmpdir,
+        'export TMPDIR="%s"' % tmpdir,
+        'echo Temporary directory is ${TMPDIR}']
+
+
 def check_content(args: dict) -> None:
     """Ask user to check for the job script content, which is composed of
     "directives", "preamble", and "commands"
@@ -255,7 +300,7 @@ def check_content(args: dict) -> None:
                 Commands composing the actual job
     """
     if args['verif']:
-        for part in ['directives', 'preamble', 'scratching', 'mkdir',
+        for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
             if part not in args:
                 continue
@@ -288,7 +333,7 @@ def write_out(args: dict) -> None:
                 Whether to prepend `/usr/bin/time -v` to every script command
     """
     with open(args['job_fp'], 'w') as o:
-        for part in ['directives', 'preamble', 'scratching', 'mkdir',
+        for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
             for line_ in args[part]:
                 line = line_

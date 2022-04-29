@@ -18,7 +18,7 @@ from Xhpc.preamble import get_preamble
 from Xhpc.cmd import get_commands
 from Xhpc.relocate import get_relocation
 from Xhpc.io_utils import (get_job_fp, get_output_dir, get_sinfo_pd,
-                           write_out, check_content)
+                           get_tmpdir, write_out, check_content)
 
 
 def xhpc(**args) -> None:
@@ -106,6 +106,7 @@ def xhpc(**args) -> None:
     get_directives(args)  # prepare job directives
     get_commands(args)  # get job command lines
     get_preamble(args)  # set environment and working directory
+    get_tmpdir(args)  # set temporary directory
     get_relocation(args)   # arrange file movement
     # write the psb file to provide to "qsub"
     check_content(args)  # print-based, visual checks

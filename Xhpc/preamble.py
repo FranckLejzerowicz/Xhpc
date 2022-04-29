@@ -100,7 +100,8 @@ def add_tmpdir(args: dict) -> bool:
     args['preamble'].extend([
         '\n# create and export the temporary directory',
         'mkdir -p %s' % tmpdir,
-        'export TMPDIR="%s"' % tmpdir
+        'export TMPDIR="%s"' % tmpdir,
+        'echo Temporary directory is ${TMPDIR}'
     ])
     return True
 
@@ -123,7 +124,7 @@ def add_procs_nodes(args: dict) -> None:
     args['preamble'].append('NNODES=`uniq %s | wc -l`' % node_info)
 
 
-def add_echoes(args: dict, tmp: bool) -> None:
+def add_echoes(args: dict) -> None:
     """Add things to echo in the job preamble that will be available in the
     stdout.
 
@@ -135,8 +136,6 @@ def add_echoes(args: dict, tmp: bool) -> None:
                 Working directory
             torque: bool
                 Adapt to Torque
-    tmp : bool
-        Whether a temporary folder is set or not
     """
     args['preamble'].extend([
         '\n# echo some info about the job',
@@ -144,8 +143,6 @@ def add_echoes(args: dict, tmp: bool) -> None:
         'echo Time is `date`',
         'echo Directory is `pwd`'
     ])
-    if not tmp:
-        args['preamble'].append("echo Temporary directory is $TMPDIR")
     add_procs_nodes(args)
     args['preamble'].extend([
         'echo Use ${NPROCS} procs on ${NNODES} nodes',
@@ -171,7 +168,5 @@ def get_preamble(args: dict) -> None:
     add_env(args)  # environment variables
     # set an alternative workdir for the job
     add_workdir(args)
-    # set temporary folder
-    tmp = add_tmpdir(args)
     # set preamble on the job environment
-    add_echoes(args, tmp)
+    add_echoes(args)
