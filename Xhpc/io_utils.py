@@ -57,8 +57,8 @@ def get_sinfo_pd(args: dict, sinfo_dir: str) -> None:
         # -------------------------------------------------------------
         # -----------               CHANGE                  -----------
         # -------------------------------------------------------------
-        fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
-        # fp = '%s/%s.tsv' % (sinfo_dir, str(datetime.now().date()))
+        # fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
+        fp = '%s/%s.tsv' % (sinfo_dir, str(datetime.now().date()))
         # -------------------------------------------------------------
         # -------------------------------------------------------------
 
@@ -113,6 +113,7 @@ def collect_sinfo_pd() -> pd.DataFrame:
     sinfo_out = decode_sinfo_stdout(sinfo_stdout)
     # with open('/Users/franck/programs/Xsinfo/Xsinfo/test/snap.txt') as o:
     #     sinfo_out = yaml.load(o, Loader=yaml.Loader)
+    print(sinfo_out)
     sinfo_pd = pd.DataFrame(sinfo_out, columns=[
         'node', 'partition', 'status', 'cpu_load', 'cpus',
         'socket', 'cores', 'threads', 'mem', 'free_mem'])
