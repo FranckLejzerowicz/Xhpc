@@ -165,13 +165,15 @@ def get_final_command_part(quote_part: list, quote: str) -> str:
     return final_part
 
 
-def get_terms(part: str) -> list:
+def get_separated_terms(part: str, separator: str) -> list:
     """Get the list of terms that may hide separated by a comma in the command.
 
     Parameters
     ----------
     part : str
         A space-separated term in a decomposed command line
+    separator : str
+        A comma or a colon or a semicolon
 
     Returns
     -------
@@ -179,8 +181,8 @@ def get_terms(part: str) -> list:
         Either the term alone or the terms separated by a comma
     """
     terms = [part]
-    if ',' in part:
-        terms = part.split(',')
+    if separator in part:
+        terms = part.split(separator)
     return terms
 
 
@@ -212,19 +214,23 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
             quote_part = list()
             quote_part_split = quote_part_.split(' ')
             for tdx, part in enumerate(quote_part_split):
-                terms = get_terms(part)
+                comma_terms = get_separated_terms(part, ',')
                 comma_separated = []
-                for term_ in terms:
-                    # Get the term (an abspath if it is an existing path)
-                    term = get_term(args, tdx, term_)
-                    # If them found as being an absolute path
-                    if term.startswith('/'):
-                        # Add term to set of paths
-                        paths.add(term)
-                        # Use it in command from scratch area if requested
-                        if args['move']:
-                            term = '${SCRATCH_DIR}%s' % term
-                    comma_separated.append(term)
+                for comma_term in comma_terms:
+                    colon_terms = get_separated_terms(comma_term, ':')
+                    colon_separated = []
+                    for term_ in colon_terms:
+                        # Get the term (an abspath if it is an existing path)
+                        term = get_term(args, tdx, term_)
+                        # If them found as being an absolute path
+                        if term.startswith('/'):
+                            # Add term to set of paths
+                            paths.add(term)
+                            # Use it in command from scratch area if requested
+                            if args['move']:
+                                term = '${SCRATCH_DIR}%s' % term
+                        colon_separated.append(term)
+                    comma_separated.append(':'.join(colon_separated))
                 quote_part.append(','.join(comma_separated))
             parts.append(get_final_command_part(quote_part, quote))
         commands.append(''.join(parts))
