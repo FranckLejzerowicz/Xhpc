@@ -93,7 +93,7 @@ def get_in_out(paths: set) -> dict:
     for path in paths:
         if isfile(path):
             in_out['files'].add(path)
-        elif isdir(path):
+        elif isdir(path) or isdir(dirname(path)):
             in_out['folders'].add(path)
         else:
             in_out['out'].add(path)
