@@ -79,6 +79,9 @@ from Xhpc import __version__
     "--clear-scratch/--no-clear-scratch", default=True, show_default=True,
     help="Whether to cleat the scratch area at the end of the job or not")
 @click.option(
+    "--stdout/--no-stdout", default=True, show_default=True,
+    help="Rename stdout (and stderr) with job name and ID")
+@click.option(
     "--email/--no-email", default=False, show_default=True,
     help="Send email at job completion (always if fail)")
 @click.option(
@@ -136,6 +139,7 @@ def standalone_xhpc(
         scratch,
         userscratch,
         clear_scratch,
+        stdout,
         email,
         run,
         move,
@@ -171,6 +175,7 @@ def standalone_xhpc(
         userscratch=userscratch,
         clear_scratch=clear_scratch,
         workdir=p_workdir,
+        stdout=stdout,
         email=email,
         run=run,
         move=move,

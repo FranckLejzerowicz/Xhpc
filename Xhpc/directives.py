@@ -143,7 +143,7 @@ def set_email(args: dict) -> str:
             directive = '#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80'
         else:
             directive = '#SBATCH --mail-type=FAIL,TIME_LIMIT_80'
-        directive += '\n#SBATCH --mail-user="%s"' % args['email_address']
+        directive += '\n#SBATCH --mail-user=%s' % args['email_address']
     return directive
 
 
@@ -185,6 +185,8 @@ def set_stdout_stderr(args: dict) -> str:
         directive = '#SBATCH -o %s.o\n#SBATCH -e %s.e' % (std_path, std_path)
     args['std_path'] = std_path
     args['job_id'] = job_id
+    if not args['stdout']:
+        return None
     return directive
 
 

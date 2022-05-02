@@ -73,6 +73,8 @@ def xhpc(**args) -> None:
                 Folder to not move to and from scratch using rsync (must exist)
             exclude : tuple
                 Relative path(s) within input folder(s) to not move in scratch
+            stdout : bool
+                Rename stdout (and stderr) with job name and ID
             email: bool
                 Send email (always if fail)
             run: bool
