@@ -316,6 +316,26 @@ def check_content(args: dict) -> None:
                 sys.exit(1)
 
 
+def get_lines(part) -> list:
+    """
+
+    Parameters
+    ----------
+    part : list or set
+        Commands to write out for a section
+
+    Returns
+    -------
+    lines : list
+        Commands list to write out for a section (if was a set, a sorted list)
+    """
+    if isinstance(part, list):
+        lines = part
+    if isinstance(part, set):
+        lines = sorted(part)
+    return lines
+
+
 def write_out(args: dict) -> None:
     """Write the actual .pbs / slurm .sh script based on
     the info collected from the command line.
@@ -337,7 +357,8 @@ def write_out(args: dict) -> None:
         for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
             next_line = False
-            for line_ in args[part]:
+            lines = get_lines(args[part])
+            for line_ in lines:
                 line = line_
                 if args['stat'] and part == 'commands':
                     if next_line or not line_.strip():
