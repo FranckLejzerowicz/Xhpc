@@ -157,7 +157,7 @@ def get_min_folders(folders: set, included: set) -> set:
                 exclude.add(f1)
 
     # Actual reduction to remove all folders contained within a broader path
-    min_folders = folders.difference(exclude)
+    min_folders = folders.difference(exclude) | included
     return min_folders
 
 
