@@ -206,7 +206,7 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
     commands : list
         Line of the script with paths potentially changed to abspaths
     """
-    if line_[0] == '#':
+    if not line_.strip() or line_[0] == '#':
         commands.append(line_.strip('\n'))
     else:
         parts = list()
