@@ -41,9 +41,10 @@ def get_sinfo_pd(args: dict, sinfo_dir: str) -> None:
     # # -------------------------------------------------------------
     # # -----------               DELETE                  -----------
     # # -------------------------------------------------------------
-    # import yaml
     # fp = '/Users/franck/programs/Xhpc/Xhpc/test/snap.txt'
-    # return pd.read_csv(fp, sep='\t')
+    # sinfo_pd = pd.read_csv(fp, sep='\t')
+    # args['sinfo_pd'] = sinfo_pd
+    # return sinfo_pd
     # # -------------------------------------------------------------
     # # -------------------------------------------------------------
     if args['torque']:
@@ -335,11 +336,18 @@ def write_out(args: dict) -> None:
     with open(args['job_fp'], 'w') as o:
         for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
+            next_line = False
             for line_ in args[part]:
                 line = line_
                 if args['stat'] and part == 'commands':
-                    line = '/usr/bin/time -v %s' % line_
+                    if next_line or not line_.strip():
+                        line = line_
+                    else:
+                        line = '/usr/bin/time -v %s' % line_
                 o.write('%s\n' % line)
+                next_line = False
+                if line.endswith('\\'):
+                    next_line = True
             if part in args:
                 o.write('# ------ %s END ------\n' % part)
             o.write('\n')
