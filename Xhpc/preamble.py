@@ -171,5 +171,3 @@ def get_preamble(args: dict) -> None:
     add_workdir(args)
     # set preamble on the job environment
     add_echoes(args)
-    # # create the directories outputs
-    # add_mkdirs(args)
