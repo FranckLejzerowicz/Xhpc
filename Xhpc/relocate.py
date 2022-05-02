@@ -297,13 +297,13 @@ def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
     for folder in min_paths['folders']:
         source = '${SCRATCH_DIR}%s' % folder
         args['mkdir'].add('mkdir -p %s' % source)
-        args['move_from'].add('rsync -auqr %s/ %s' % (source, folder))
+        args['move_from'].add('rsync -aqru %s/ %s' % (source, folder))
     for path in in_out['out']:
         source = '${SCRATCH_DIR}%s' % path
         args['move_from'].update([
-            'if [ -d %s ]; then mkdir -p %s; rsync -auqr %s/ %s; fi' % (
+            'if [ -d %s ]; then mkdir -p %s; rsync -aqru %s/ %s; fi' % (
                 source, path, source, path),
-            'if [ -f %s ]; then rsync -auqr %s %s; fi' % (
+            'if [ -f %s ]; then rsync -aqru %s %s; fi' % (
                 source, source, path)])
 
 
