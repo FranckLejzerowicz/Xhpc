@@ -334,8 +334,7 @@ def get_lines(part) -> list:
     elif isinstance(part, set):
         lines = sorted(part)
     else:
-        print(part)
-        print(partdsa)
+        raise TypeError('Commands are collected either as list or set')
     return lines
 
 
