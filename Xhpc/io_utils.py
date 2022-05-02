@@ -331,8 +331,11 @@ def get_lines(part) -> list:
     """
     if isinstance(part, list):
         lines = part
-    if isinstance(part, set):
+    elif isinstance(part, set):
         lines = sorted(part)
+    else:
+        print(part)
+        print(partdsa)
     return lines
 
 
