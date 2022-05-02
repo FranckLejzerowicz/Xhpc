@@ -359,6 +359,8 @@ def write_out(args: dict) -> None:
     with open(args['job_fp'], 'w') as o:
         for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
+            if part not in args:
+                continue
             next_line = False
             lines = get_lines(args[part])
             for line_ in lines:
