@@ -179,24 +179,23 @@ def get_include_commands(args: dict) -> set:
     """
     included = set()
     if args['include']:
-        m_to = []
-        m_from = []
+        m_to = set()
+        m_from = set()
         for folder_ in args['include']:
             if not isdir(folder_):
                 continue
             folder = os.path.abspath(folder_)
             included.add(folder)
             scratch = '${SCRATCH_DIR}%s' % folder
-            args['mkdir'].update(['mkdir -p %s' % dirname(scratch),
-                                  'mkdir -p %s' % folder])
-            m_to.append('rsync -aqru %s/ %s' % (folder, scratch))
-            m_from.append('rsync -aqru %s/ %s' % (scratch, folder))
+            args['mkdir'].add('mkdir -p %s' % dirname(scratch))
+            m_to.add('rsync -aqru %s/ %s' % (folder, scratch))
+            m_from.add('rsync -aqru %s/ %s' % (scratch, folder))
         if m_to:
             args['move_to'].append('\n# Include command (move to scratch)')
-            args['move_to'].extend(m_to)
+            args['move_to'].extend(sorted(m_to))
         if m_from:
             args['move_from'].append('\n# Include command (move from scratch)')
-            args['move_from'].extend(m_from)
+            args['move_from'].extend(sorted(m_from))
     return included
 
 
@@ -270,9 +269,14 @@ def get_min_paths(in_out: dict, included: set) -> dict:
         command (key "folders") and files not present with the minimum set of
         folders (key "files")
     """
+    print("\nin_out['folders']:")
+    print(in_out['folders'])
     min_folders = get_min_folders(in_out['folders'], included)
+    print('\nmin_folders:')
     print(min_folders)
     min_files = get_min_files(in_out['files'], min_folders)
+    print('\nmin_files:')
+    print(min_files)
     min_paths = {'folders': min_folders, 'files': min_files}
     return min_paths
 
@@ -335,6 +339,8 @@ def get_relocating_commands(args: dict) -> None:
     """
     # Folders to move to and from scratch
     included = get_include_commands(args)
+    print('\nincluded:')
+    print(included)
     # Folders not to move to scratch
     exclude = get_exclude(args)
 
