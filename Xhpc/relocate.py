@@ -287,6 +287,7 @@ def get_in_commands(args: dict, min_paths: dict, exclude: str = '') -> None:
         Exclude command with the requested file and folder paths
     """
     for min_folder in min_paths['folders']:
+        print('min_folder:', min_folder)
         args['move_to'].extend(move_to(args, min_folder, True, exclude))
     for min_file in min_paths['files']:
         args['move_to'].extend(move_to(args, min_file, False))

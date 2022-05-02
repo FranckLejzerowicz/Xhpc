@@ -306,8 +306,16 @@ def get_directives(args: dict) -> None:
     # init directives with a shebang that's hopefully universal here
     args['directives'] = ['#!/bin/bash']
     for set_directive in (
-        set_environment, set_account, set_partition, set_job, set_localscratch,
-        set_email, set_stdout_stderr, set_time, set_memory, set_nodes
+        set_environment,
+        set_account,
+        set_partition,
+        set_job,
+        set_localscratch,
+        set_email,
+        set_stdout_stderr,
+        set_time,
+        set_memory,
+        set_nodes
     ):
         directive = set_directive(args)
         if directive:

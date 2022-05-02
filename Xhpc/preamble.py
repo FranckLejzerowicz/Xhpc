@@ -117,11 +117,12 @@ def add_procs_nodes(args: dict) -> None:
                 Adapt to Torque
     """
     # Calculate the number of processors/nodes allocated to this run.
-    node_info = '$SLURM_JOB_NODELIST'
     if args['torque']:
-        node_info = '$PBS_NODEFILE'
-    args['preamble'].append('NPROCS=`wc -l < %s`' % node_info)
-    args['preamble'].append('NNODES=`uniq %s | wc -l`' % node_info)
+        args['preamble'].append('NPROCS=`wc -l < ${PBS_NODEFILE}`')
+        args['preamble'].append('NNODES=`uniq ${PBS_NODEFILE} | wc -l`')
+    else:
+        args['preamble'].append('NPROCS=${SLURM_NTASKS}')
+        args['preamble'].append('NNODES=${SLURM_NNODES}')
 
 
 def add_echoes(args: dict) -> None:
@@ -170,3 +171,5 @@ def get_preamble(args: dict) -> None:
     add_workdir(args)
     # set preamble on the job environment
     add_echoes(args)
+    # # create the directories outputs
+    # add_mkdirs(args)
