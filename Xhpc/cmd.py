@@ -165,6 +165,25 @@ def get_final_command_part(quote_part: list, quote: str) -> str:
     return final_part
 
 
+def get_terms(part: str) -> list:
+    """Get the list of terms that may hide separated by a comma in the command.
+
+    Parameters
+    ----------
+    part : str
+        A space-separated term in a decomposed command line
+
+    Returns
+    -------
+    terms : list
+        Either the term alone or the terms separated by a comma
+    """
+    terms = [part]
+    if ',' in part:
+        terms = part.split(',')
+    return terms
+
+
 def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
     """Turn the words that have a path into an abspath (except for
     executables), and prepend these with the environment variable pointing
@@ -192,17 +211,21 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
         for (quote_part_, quote) in quote_split_line(line_.strip('\n')):
             quote_part = list()
             quote_part_split = quote_part_.split(' ')
-            for tdx, term_ in enumerate(quote_part_split):
-                # Get the term (possible an abspath if it is an existing path)
-                term = get_term(args, tdx, term_)
-                # If them found as being an absolute path
-                if term.startswith('/'):
-                    # Add term to set of paths
-                    paths.add(term)
-                    # Use it in the command from the scratch area if requested
-                    if args['move']:
-                        term = '${SCRATCH_DIR}%s' % term
-                quote_part.append(term)
+            for tdx, part in enumerate(quote_part_split):
+                terms = get_terms(part)
+                comma_separated = []
+                for term_ in terms:
+                    # Get the term (an abspath if it is an existing path)
+                    term = get_term(args, tdx, term_)
+                    # If them found as being an absolute path
+                    if term.startswith('/'):
+                        # Add term to set of paths
+                        paths.add(term)
+                        # Use it in command from scratch area if requested
+                        if args['move']:
+                            term = '${SCRATCH_DIR}%s' % term
+                    comma_separated.append(term)
+                quote_part.append(','.join(comma_separated))
             parts.append(get_final_command_part(quote_part, quote))
         commands.append(''.join(parts))
 
