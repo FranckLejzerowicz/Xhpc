@@ -123,6 +123,7 @@ def add_procs_nodes(args: dict) -> None:
     else:
         args['preamble'].append('NPROCS=${SLURM_NTASKS}')
         args['preamble'].append('NNODES=${SLURM_NNODES}')
+    args['preamble'].append('echo Use ${NPROCS} procs on ${NNODES} nodes')
 
 
 def add_echoes(args: dict) -> None:
@@ -145,11 +146,9 @@ def add_echoes(args: dict) -> None:
         'echo Directory is `pwd`'
     ])
     add_procs_nodes(args)
-    args['preamble'].extend([
-        'echo Use ${NPROCS} procs on ${NNODES} nodes',
-        'echo Job stdout is %s.o' % args['std_path'],
-        'echo Job stderr is %s.e' % args['std_path']
-    ])
+    stdout = 'echo Job stdout is %s' % args['std_path'],
+    stderr = 'echo Job stderr is %s' % args['std_path']
+    args['preamble'].extend(['%s.out' % stdout, '%s.err' % stderr])
 
 
 def get_preamble(args: dict) -> None:
