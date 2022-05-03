@@ -239,6 +239,20 @@ class TestCheckContent(unittest.TestCase):
         self.args = {'directives': ['A'], 'preamble': ['B'],
                      'commands': ['C'], 'verif': True}
 
+    def test_get_lines(self):
+        obs = get_lines(['2', '1'])
+        exp = ['2', '1']
+        self.assertEqual(exp, obs)
+
+        obs = get_lines({'2', '1'})
+        exp = ['1', '2']
+        self.assertEqual(exp, obs)
+
+        with self.assertRaises(TypeError) as cm:
+            get_lines('a')
+        self.assertEqual(str(cm.exception),
+                         'Commands are collected either as list or set')
+
     def test_no_check_content(self):
         self.args = {'verif': False}
         self.assertIsNone(check_content(self.args))
@@ -254,22 +268,35 @@ class TestWriteOut(unittest.TestCase):
 
     def setUp(self) -> None:
         self.out = '%s/dummy_output.txt' % test_folder
-        self.content = [
+        self.content_base = [
             'A\n', '# ------ directives END ------\n', '\n',
             'B\n', '# ------ preamble END ------\n', '\n',
-            'C\n', '# ------ in END ------\n', '\n',
             'D\n', '# ------ commands END ------\n', '\n',
-            'E\n', '# ------ mv END ------\n', '\n',
-            'F\n', '# ------ out END ------\n', '\n',
+            'echo "Done!"\n']
+        self.content_time = [
+            'A\n', '# ------ directives END ------\n', '\n',
+            'B\n', '# ------ preamble END ------\n', '\n',
+            '/usr/bin/time -v cmd \\\n', '\t-i X \\\n', '\t-e Y\n',
+            '# ------ commands END ------\n', '\n',
+            'echo "Done!"\n']
+        self.content_move = [
+            'A\n', '# ------ directives END ------\n', '\n',
+            'B\n', '# ------ preamble END ------\n', '\n',
+            'C\n', '# ------ move_to END ------\n', '\n',
+            'D\n', '# ------ commands END ------\n', '\n',
+            'E\n', '# ------ move_from END ------\n', '\n',
+            'F\n', '# ------ clear END ------\n', '\n',
             'echo "Done!"\n']
         self.args = {
             'job_fp': self.out,
-            'directives': ['A'],
-            'preamble': ['B'],
-            'in': ['C'],
+            'directives': {'A'},
+            'preamble': {'B'},
+            'move_to': set(),
             'commands': ['D'],
-            'mv': ['E'],
-            'out': ['F'],
+            'move_from': set(),
+            'clear': set(),
+            'move': False,
+            'stat': False,
         }
 
     def test_write_out(self):
@@ -278,7 +305,29 @@ class TestWriteOut(unittest.TestCase):
         with open(self.out) as f:
             for line in f:
                 lines.append(line)
-        self.assertEqual(lines, self.content)
+        self.assertEqual(lines, self.content_base)
+
+    def test_write_out_time(self):
+        self.args['stat'] = True
+        self.args['commands'] = ['cmd \\', '\t-i X \\', '\t-e Y']
+        write_out(self.args)
+        lines = []
+        with open(self.out) as f:
+            for line in f:
+                lines.append(line)
+        self.assertEqual(lines, self.content_time)
+
+    def test_write_out_move(self):
+        self.args['move'] = True
+        self.args['move_to'] = {'C'}
+        self.args['move_from'] = {'E'}
+        self.args['clear'] = {'F'}
+        write_out(self.args)
+        lines = []
+        with open(self.out) as f:
+            for line in f:
+                lines.append(line)
+        self.assertEqual(lines, self.content_move)
 
     def tearDown(self) -> None:
         os.remove(self.out)

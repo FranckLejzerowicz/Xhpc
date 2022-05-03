@@ -119,28 +119,6 @@ def quote_split_line(line_: str) -> list:
     return line_split
 
 
-def collect_term_in_paths(term: str, paths: set) -> None:
-    """Add the command line term to the set of paths if it was found as
-    being an absolute path.
-
-    Notes
-    -----
-    Not yet existing output files/folders that are given in the command
-    without an absolute paths would not be possibly detected and
-    therefore, will not be collected here. Hence, it is strongly advised to
-    provide the output paths as absolute paths.
-
-    Parameters
-    ----------
-    term : str
-        The space-separated term changed (or not) to abspath
-    paths : set
-        Paths to file or folders to move when using scratch folder
-    """
-    if term.startswith('/'):
-        paths.add(term)
-
-
 def get_final_command_part(quote_part: list, quote: str) -> str:
     """Reconstitute the part of the command line that was split
     based on quoting (or not). If a split was indeed operated based

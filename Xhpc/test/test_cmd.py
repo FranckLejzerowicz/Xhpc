@@ -54,6 +54,22 @@ class Test(unittest.TestCase):
         obs = check_term(self.args, 'whatever')
         self.assertEqual(obs, 'whatever')
 
+    def test_get_separated_terms(self):
+        term, sep = 'no_sep', ','
+        exp = ['no_sep']
+        obs = get_separated_terms(term, sep)
+        self.assertEqual(exp, obs)
+
+        term, sep = 'sep1,sep2', ','
+        exp = ['sep1', 'sep2']
+        obs = get_separated_terms(term, sep)
+        self.assertEqual(exp, obs)
+
+        term, sep = 'sep1:sep2', ':'
+        exp = ['sep1', 'sep2']
+        obs = get_separated_terms(term, sep)
+        self.assertEqual(exp, obs)
+
     def test_get_term(self):
         obs = get_term(self.args, 0, '')
         self.assertEqual(obs, '')
@@ -105,13 +121,6 @@ class Test(unittest.TestCase):
         exp = [('', ''), ('that', "'"), (' should never happen', '')]
         self.assertEqual(exp, obs)
 
-    def test_collect_term_in_paths(self):
-        paths = set()
-        collect_term_in_paths('no_slash', paths)
-        self.assertEqual(paths, set())
-        collect_term_in_paths('/slash', paths)
-        self.assertEqual(paths, {'/slash'})
-
     def test_get_final_command_part(self):
         obs = get_final_command_part(['a', 'b'], '')
         exp = 'a b'
@@ -133,19 +142,40 @@ class Test(unittest.TestCase):
         self.assertEqual(self.paths, set())
 
     def test_parse_line_simple_path(self):
-        parse_line(self.line_simple_path, self.args, self.paths, self.commands)
-        self.assertEqual([self.line_simple_path], self.commands)
+        line_simple_path = 'exe -i /in -o /out'
+        parse_line(line_simple_path, self.args, self.paths, self.commands)
+        self.assertEqual([line_simple_path], self.commands)
+        self.assertEqual(self.paths, {'/in', '/out'})
+
+    def test_parse_line_simple_path_move(self):
+        self.args['move'] = True
+        line_simple_path = 'exe -i /in -o /out'
+        parse_line(line_simple_path, self.args, self.paths, self.commands)
+        self.assertEqual(['exe -i ${SCRATCH_DIR}/in -o ${SCRATCH_DIR}/out'],
+                         self.commands)
         self.assertEqual(self.paths, {'/in', '/out'})
 
     def test_parse_line_exists(self):
-        parse_line(self.line_exists, self.args, self.paths, self.commands)
+        line_exists = 'exe -i test_parse_line_in -o test_parse_line_out'
+        parse_line(line_exists, self.args, self.paths, self.commands)
         exp = ['exe -i %s -o test_parse_line_out' % self.abspath_fp]
         self.assertEqual(exp, self.commands)
         self.assertEqual(self.paths, {self.abspath_fp})
 
+    def test_parse_line_complex(self):
+        self.args['move'] = True
+        line = 'name -i "/a,/b" -o /x,/y:/1:/2'
+        parse_line(line, self.args, self.paths, self.commands)
+        out = 'name -i "${SCRATCH_DIR}/a,${SCRATCH_DIR}/b" -o ${SCRATCH_DIR}'
+        out += '/x,${SCRATCH_DIR}/y:${SCRATCH_DIR}/1:${SCRATCH_DIR}/2'
+        exp = [out]
+        self.assertEqual(exp, self.commands)
+        self.assertEqual(self.paths, {'/a', '/b', '/x', '/y', '/1', '/2'})
+
     def test_parse_line_exists_move(self):
         self.args['move'] = True
-        parse_line(self.line_exists, self.args, self.paths, self.commands)
+        line_exists = 'exe -i test_parse_line_in -o test_parse_line_out'
+        parse_line(line_exists, self.args, self.paths, self.commands)
         exp = [
             'exe -i ${SCRATCH_DIR}%s -o test_parse_line_out' % self.abspath_fp]
         self.assertEqual(exp, self.commands)
