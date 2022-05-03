@@ -303,7 +303,7 @@ def check_content(args: dict) -> None:
     if args['verif']:
         for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
-            if part not in args:
+            if part not in args or not args[part]:
                 continue
             print('------------------------%s' % ('-' * len(part)))
             print("Please check the job's %s:" % part)
