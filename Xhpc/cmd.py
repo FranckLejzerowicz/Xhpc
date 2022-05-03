@@ -205,7 +205,7 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                             # Add term to set of paths
                             paths.add(term)
                             # Use it in command from scratch area if requested
-                            if args['move']:
+                            if args['move'] and term not in args['exclude']:
                                 term = '${SCRATCH_DIR}%s' % term
                         colon_separated.append(term)
                     comma_separated.append(':'.join(colon_separated))

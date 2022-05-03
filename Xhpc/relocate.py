@@ -191,31 +191,7 @@ def get_include_commands(args: dict) -> set:
     return included
 
 
-def get_exclude(args: dict) -> str:
-    """Get the "--exclude" option for the rsync command to exclude files
-    and/or folder provided b the user.
-
-    Parameters
-    ----------
-    args : dict
-        All arguments, including:
-            exclude : tuple
-                Relative path(s) within input folder(s) to not move in scratch
-
-    Returns
-    -------
-    exclude : str
-        Exclude command with the requested file and folder paths
-    """
-    exclude = ''
-    if args['exclude']:
-        # the leading "/" is because the previous term will be a folder, so
-        # that the rsync command can work for folder contents transfer
-        exclude = "/ --exclude={'%s'}" % "','".join(args['exclude'])
-    return exclude
-
-
-def move_to(args: dict, path: str, is_folder: bool, exclude: str = '') -> None:
+def move_to(args: dict, path: str, is_folder: bool) -> None:
     """
 
     Parameters
@@ -226,15 +202,14 @@ def move_to(args: dict, path: str, is_folder: bool, exclude: str = '') -> None:
         A folder or a file to move to scratch
     is_folder : bool
         Whether the path is a folder (True) or a file (False)
-    exclude : str
-        Exclude command with the requested file and folder paths
     """
     source = path
     if is_folder:
         source += '/'
     destination = '${SCRATCH_DIR}%s' % path
-    args['mkdir'].add('mkdir -p %s' % dirname(destination))
-    args['move_to'].add('rsync -aqru %s %s%s' % (source, destination, exclude))
+    if path not in set(args['exclude']):
+        args['mkdir'].add('mkdir -p %s' % dirname(destination))
+        args['move_to'].add('rsync -aqru %s %s' % (source, destination))
 
 
 def get_min_paths(in_out: dict, included: set) -> dict:
@@ -261,7 +236,7 @@ def get_min_paths(in_out: dict, included: set) -> dict:
     return min_paths
 
 
-def get_in_commands(args: dict, min_paths: dict, exclude: str = '') -> None:
+def get_in_commands(args: dict, min_paths: dict) -> None:
     """Get command that move the inputs to scratch.
 
     Parameters
@@ -270,11 +245,9 @@ def get_in_commands(args: dict, min_paths: dict, exclude: str = '') -> None:
         All arguments.
     min_paths : set
         Folder and files that must be move to the scratch folder
-    exclude : str
-        Exclude command with the requested file and folder paths
     """
     for min_folder in min_paths['folders']:
-        move_to(args, min_folder, True, exclude)
+        move_to(args, min_folder, True)
     for min_file in min_paths['files']:
         move_to(args, min_file, False)
 
@@ -296,8 +269,9 @@ def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
     """
     for folder in min_paths['folders']:
         source = '${SCRATCH_DIR}%s' % folder
-        args['mkdir'].add('mkdir -p %s' % source)
-        args['move_from'].add('rsync -aqru %s/ %s' % (source, folder))
+        if folder not in set(args['exclude']):
+            args['mkdir'].add('mkdir -p %s' % source)
+            args['move_from'].add('rsync -aqru %s/ %s' % (source, folder))
     for path in in_out['out']:
         source = '${SCRATCH_DIR}%s' % path
         args['move_from'].update([
@@ -319,15 +293,13 @@ def get_relocating_commands(args: dict) -> None:
     """
     # Folders to move to and from scratch
     included = get_include_commands(args)
-    # Folders not to move to scratch
-    exclude = get_exclude(args)
 
     # Get paths to existing folders and files, and non-existing ones (outputs?)
     in_out = get_in_out(args['paths'])
     min_paths = get_min_paths(in_out, included)
 
     # Move in to scratch
-    get_in_commands(args, min_paths, exclude)
+    get_in_commands(args, min_paths)
     # Move out from scratch
     get_out_commands(args, min_paths, in_out)
 
