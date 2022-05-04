@@ -60,7 +60,6 @@ def get_scratching_commands(args: dict) -> None:
     if args['scratch'] or args['userscratch'] or args['localscratch']:
         # Define scratch directory
         scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
-
         # Get commands to create and more to scratch directory
         args['scratching'].append('\n# Define and create a scratch directory')
         args['scratching'].append('SCRATCH_DIR="%s"' % scratch_path)
@@ -68,11 +67,8 @@ def get_scratching_commands(args: dict) -> None:
         args['scratching'].append('cd ${SCRATCH_DIR}')
         args['scratching'].append('echo Working directory is ${SCRATCH_DIR}')
     else:
-        args['scratching'].append('\n# Define scratch directory as working dir')
-        if args['torque']:
-            args['scratching'].append('SCRATCH_DIR=$PBS_O_WORKDIR')
-        else:
-            args['scratching'].append('SCRATCH_DIR=$SLURM_SUBMIT_DIR')
+        raise IOError('Must specify `--scratch`, `--userscratch` or '
+                      '`--localscratch to use `--move`')
 
 
 def get_in_out(paths: set) -> dict:
@@ -358,11 +354,6 @@ def get_relocation(args: dict) -> None:
             move : bool
                 Move files/folders to chosen scratch location
     """
-    args['scratching'] = []
-    args['mkdir'] = set()
-    args['move_to'] = set()
-    args['move_from'] = set()
-    args['clear'] = []
     if args['move']:
         # Get scratch folder creation and deletion commands
         get_scratching_commands(args)

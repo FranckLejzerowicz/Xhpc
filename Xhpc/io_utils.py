@@ -14,6 +14,21 @@ from datetime import datetime
 from os.path import abspath, isfile, isdir
 
 
+def init_args(args: dict) -> None:
+    """Initialize key/value pairs in the args dict to be filled is necessary.
+
+    Parameters
+    ----------
+    args : dict
+        All arguments
+    """
+    args['scratching'] = []
+    args['mkdir'] = set()
+    args['move_to'] = set()
+    args['move_from'] = set()
+    args['clear'] = []
+
+
 def get_sinfo_pd(args: dict, sinfo_dir: str) -> None:
     """Collect the nodes info from the output of sinfo if the user asks
     for Xhpc to allocate specific nodes ot the job being created,
@@ -269,7 +284,7 @@ def get_tmpdir(args: dict) -> bool:
     else:
         return None  # if no TMPDIR is set, keep the default machine behavior
 
-    tmpdir += '/' + args['job']
+    tmpdir += '_' + args['job']
     if args['torque']:
         tmpdir += '_${PBS_JOBID}'
     else:
@@ -281,6 +296,7 @@ def get_tmpdir(args: dict) -> bool:
         'mkdir -p %s' % tmpdir,
         'export TMPDIR="%s"' % tmpdir,
         'echo Temporary directory is ${TMPDIR}']
+    args['clear'].append('rm -rf %s' % tmpdir)
 
 
 def check_content(args: dict) -> None:

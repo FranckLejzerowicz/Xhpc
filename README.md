@@ -139,11 +139,82 @@ Think of wildcards:
 ## Usage
 
 ```
-Xhpc -i <input_path> -o <output_path> -j <job_name> -a <account> [OPTIONS]
+Xhpc -i </path/to/file.sh> -o </path/to/output.slm> -j <job_name> ... 
 ```
 
-It is not very necessary to set values for the options `-q` and `-d`, as well 
-as for option `-N` unless you ```
+### Options
+```
+  -i, --i-script TEXT             Input script path (or double-quoted command)
+                                  [required]
+  -o, --o-script TEXT             Output script path (default to
+                                  <input>_<YYYY-MM-DD-HH-MM-SS>.slm)
+  -j, --i-job TEXT                Job name  [required]
+  -a, --p-account TEXT            Name of the account
+  -p, --p-partition [normal|bigmem|accel|optimist]
+                                  Partition name
+  -n, --p-nnodes INTEGER          Number of nodes  [default: 1]
+  -c, --p-cpus INTEGER            Number of CPUs  [default: 1]
+  -t, --p-time INTEGER            Wall time limit (in hours)  [default: 1]
+  -M, --p-mem TEXT...             Requested memory as two space-separated
+                                  entries: an integer and either 'MB' or 'GB'.
+                                  (Default: '500 MB')
+  -m, --p-mem-per-cpu TEXT...     Requested memory per cpu as two space-
+                                  separated entries: an integer and either
+                                  'MB' or 'GB'. (Default: '500 MB')
+  -N, --p-nodes TEXT              Node names, e.g. `-N c1-4 -N c6-10 -N c7-1`
+                                  (overrides option `-n`)
+  -e, --p-env TEXT                Conda environment to run the job
+  -d, --p-dir TEXT                Output directory  [default: .]
+  -T, --p-tmp TEXT                Alternative temp folder to the one defined
+                                  in $TMPDIR (if not defined: will be set to
+                                  $USERWORK, or to $SCRATCH if any scratch
+                                  option is activated)
+  -w, --p-workdir TEXT            Working directory to use instead of
+                                  $SLURM_SUBMIT_DIR
+  -y, --p-include TEXT            Folder to not move to and from scratch using
+                                  rsync (must exist)
+  -x, --p-exclude TEXT            Relative path(s) within input folder(s) to
+                                  not move in scratch
+  --move / --no-move              Move files/folders to chosen scratch
+                                  location  [default: no-move]
+  -l, --localscratch INTEGER      Use localscratch with the provided memory
+                                  amount (in GB)
+  --scratch / --no-scratch        Use the scratch folder to move files and
+                                  compute  [default: no-scratch]
+  --userscratch / --no-userscratch
+                                  Use the userscratch folder to move files and
+                                  compute  [default: no-userscratch]
+  --clear-scratch / --no-clear-scratch
+                                  Whether to cleat the scratch area at the end
+                                  of the job or not  [default: clear-scratch]
+  --stdout / --no-stdout          Rename stdout (and stderr) with job name and
+                                  ID  [default: stdout]
+  --email / --no-email            Send email at job completion (always if
+                                  fail)  [default: no-email]
+  --run / --no-run                Run the job before exiting (subprocess)
+                                  [default: no-run]
+  --stat / --no-stat              Whether to prepend `/usr/bin/time -v` to
+                                  every script command  [default: stat]
+  --verif / --no-verif            Print script to stdout and ask for 'y/n'
+                                  user input to sanity check  [default: no-
+                                  verif]
+  --gpu / --no-gpu                Query a gpu (experimental)  [default: no-
+                                  gpu]
+  --torque / --no-torque          Adapt to Torque  [default: no-torque]
+  --config-email / --no-config-email
+                                  Show current email and/or edit it  [default:
+                                  no-config-email]
+  --config-scratch / --no-config-scratch
+                                  Show current scratch folders and/or edit
+                                  them  [default: no-config-scratch]
+  --sinfo / --no-sinfo            Print sinfo in stdout (and update
+                                  `~/.sinfo`)  [default: no-sinfo]
+  --allocate / --no-allocate      Get current machine usage (sinfo) to
+                                  allocate suitable nodes/memory  [default:
+                                  no-allocate]
+  --version                       Show the version and exit.
+  --help                          Show this message and exit.
+```
 
 ### Bug Reports
 

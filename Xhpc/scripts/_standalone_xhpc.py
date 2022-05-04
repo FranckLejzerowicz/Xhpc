@@ -14,7 +14,7 @@ from Xhpc import __version__
 
 @click.command()
 @click.option(
-    "-i", "--i-script", nargs=1,
+    "-i", "--i-script", required=True, nargs=1,
     help="Input script path (or double-quoted command)")
 @click.option(
     "-o", "--o-script", default=None, type=str,
@@ -27,12 +27,6 @@ from Xhpc import __version__
     "-p", "--p-partition", default='normal', help="Partition name",
     type=click.Choice(['normal', 'bigmem', 'accel', 'optimist']),)
 @click.option(
-    "-e", "--p-env", default=None, type=str,
-    help="Conda environment to run the job")
-@click.option(
-    "-d", "--p-dir", help="Output directory", type=str,
-    default='.', show_default=True)
-@click.option(
     "-n", "--p-nnodes", default=1, type=int,
     help="Number of nodes", show_default=True)
 @click.option(
@@ -41,11 +35,6 @@ from Xhpc import __version__
 @click.option(
     "-t", "--p-time", default=1, type=int,
     help="Wall time limit (in hours)", show_default=True)
-@click.option(
-    "-T", "--p-tmp", default=None, type=str,
-    help="Alternative temp folder to the one defined in $TMPDIR (if not "
-         "defined: will be set to $USERWORK, or to $SCRATCH if any scratch "
-         "option is activated)")
 @click.option(
     "-M", "--p-mem", nargs=2, show_default=False, default=('500', 'MB'),
     help="Requested memory as two space-separated entries: an integer and "
@@ -58,6 +47,17 @@ from Xhpc import __version__
     "-N", "--p-nodes", default=None, multiple=True,
     help="Node names, e.g. `-N c1-4 -N c6-10 -N c7-1` (overrides option `-n`)")
 @click.option(
+    "-e", "--p-env", default=None, type=str,
+    help="Conda environment to run the job")
+@click.option(
+    "-d", "--p-dir", help="Output directory", type=str,
+    default='.', show_default=True)
+@click.option(
+    "-T", "--p-tmp", default=None, type=str,
+    help="Alternative temp folder to the one defined in $TMPDIR (if not "
+         "defined: will be set to $USERWORK, or to $SCRATCH if any scratch "
+         "option is activated)")
+@click.option(
     "-w", "--p-workdir", default=None, show_default=True,
     help="Working directory to use instead of $SLURM_SUBMIT_DIR")
 @click.option(
@@ -66,6 +66,9 @@ from Xhpc import __version__
 @click.option(
     "-x", "--p-exclude", multiple=True, default=None, show_default=True,
     help="Relative path(s) within input folder(s) to not move in scratch")
+@click.option(
+    "--move/--no-move", default=False, show_default=True,
+    help="Move files/folders to chosen scratch location")
 @click.option(
     "-l", "--localscratch", type=int, show_default=False, default=None,
     help="Use localscratch with the provided memory amount (in GB)")
@@ -87,9 +90,6 @@ from Xhpc import __version__
 @click.option(
     "--run/--no-run", default=False, show_default=True,
     help="Run the job before exiting (subprocess)")
-@click.option(
-    "--move/--no-move", default=False, show_default=True,
-    help="Move files/folders to chosen scratch location")
 @click.option(
     "--stat/--no-stat", default=True, show_default=True,
     help="Whether to prepend `/usr/bin/time -v` to every script command")

@@ -17,7 +17,7 @@ from Xhpc.directives import get_directives
 from Xhpc.preamble import get_preamble
 from Xhpc.cmd import get_commands
 from Xhpc.relocate import get_relocation
-from Xhpc.io_utils import (get_job_fp, get_output_dir, get_sinfo_pd,
+from Xhpc.io_utils import (init_args, get_job_fp, get_output_dir, get_sinfo_pd,
                            get_tmpdir, write_out, check_content)
 
 
@@ -98,6 +98,7 @@ def xhpc(**args) -> None:
             allocate : bool
                 Get current machine usage to allocate suitable nodes/memory
     """
+    init_args(args)
     config_dir = '%s/user' % pkg_res.resource_filename("Xhpc", "")
     get_email_address(args, '%s/config.txt' % config_dir)  # get email address
     get_scratches(args, config_dir)  # get paths to scratch folders

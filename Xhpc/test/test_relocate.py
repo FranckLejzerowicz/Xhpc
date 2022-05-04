@@ -130,15 +130,6 @@ class TestGetNodesPpn(unittest.TestCase):
         exp = {'/a/b/c', '/1'}
         self.assertEqual(exp, obs)
 
-    def test_get_exclude(self):
-        obs = get_exclude(self.args)
-        self.assertEqual('', obs)
-
-        self.args['exclude'] = ('/some/file', '/some/dir',)
-        obs = get_exclude(self.args)
-        exp = "/ --exclude={'/some/file','/some/dir'}"
-        self.assertEqual(exp, obs)
-
     def test_get_include_commands(self):
         obs = get_include_commands(self.args)
         exp = set()
