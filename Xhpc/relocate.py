@@ -199,13 +199,16 @@ def move_to(args: dict, path: str, is_folder: bool) -> None:
     is_folder : bool
         Whether the path is a folder (True) or a file (False)
     """
-    source = path
+    local = path
+    remote_from = '${SCRATCH_DIR}%s' % path
     if is_folder:
-        source += '/'
-    destination = '${SCRATCH_DIR}%s' % path
+        local += '/'
+        remote_from = '${SCRATCH_DIR}%s/' % path
+    remote_to = '${SCRATCH_DIR}%s' % path
     if path not in set(args['exclude']):
-        args['mkdir'].add('mkdir -p %s' % dirname(destination))
-        args['move_to'].add('rsync -aqru %s %s' % (source, destination))
+        args['mkdir'].add('mkdir -p %s' % dirname(remote_to))
+        args['move_to'].add('rsync -aqru %s %s' % (local, remote_to))
+        args['move_from'].add('rsync -aqru %s %s' % (remote_from, local))
 
 
 def get_min_paths(in_out: dict, included: set) -> dict:
@@ -263,11 +266,11 @@ def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
         Sets of existing files and folder that will be moved in and
         of non-existing paths that will be move back.
     """
-    for folder in min_paths['folders']:
-        source = '${SCRATCH_DIR}%s' % folder
-        if folder not in set(args['exclude']):
-            args['mkdir'].add('mkdir -p %s' % source)
-            args['move_from'].add('rsync -aqru %s/ %s' % (source, folder))
+    # for folder in min_paths['folders']:
+    #     source = '${SCRATCH_DIR}%s' % folder
+    #     if folder not in set(args['exclude']):
+    #         args['mkdir'].add('mkdir -p %s' % source)
+    #         args['move_from'].add('rsync -aqru %s/ %s' % (source, folder))
     for path in in_out['out']:
         source = '${SCRATCH_DIR}%s' % path
         args['move_from'].update([
