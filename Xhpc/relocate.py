@@ -61,7 +61,7 @@ def get_scratching_commands(args: dict) -> None:
         # Define scratch directory
         scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
         # Get commands to create and more to scratch directory
-        args['scratching'].append('\n# Define and create a scratch directory')
+        args['scratching'].append('# Define and create a scratch directory')
         args['scratching'].append('SCRATCH_DIR="%s"' % scratch_path)
         args['scratching'].append('mkdir -p ${SCRATCH_DIR}')
         args['scratching'].append('cd ${SCRATCH_DIR}')
@@ -317,7 +317,6 @@ def get_clearing_commands(args: dict):
     """
     if args['clear_scratch']:
         # Get commands to move away and delete scratch directory
-        args['clear'].append('\n# Move away and clear the scratch area')
         if args['torque']:
             args['clear'].append('cd ${PBS_O_WORKDIR}')
             args['clear'].append('rm -rf ${SCRATCH_DIR}')

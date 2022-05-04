@@ -296,7 +296,7 @@ def get_tmpdir(args: dict) -> bool:
         'mkdir -p %s' % tmpdir,
         'export TMPDIR="%s"' % tmpdir,
         'echo Temporary directory is ${TMPDIR}']
-    args['clear'].append('rm -rf %s' % tmpdir)
+    args['clear'].append('rm -rf ${TMPDIR}')
 
 
 def check_content(args: dict) -> None:

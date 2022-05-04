@@ -20,7 +20,7 @@ def add_env(args: dict) -> None:
                 Conda environment to run the job
     """
     args['preamble'] = [
-        '\n# general environment info / behaviour',
+        '# general environment info / behaviour',
         'uname -a',  # Show some machine specs for reproducibility
         'set -e',    # Exit the script on any error
         'set -u',    # Treat any unset variables as an error
@@ -29,7 +29,7 @@ def add_env(args: dict) -> None:
     if args['env']:
         # activate the env
         env = [
-            '\n# active conda environment',
+            '\n     # active conda environment',
             'echo "Conda environment is %s"' % args['env'],
             'source activate %s' % args['env']
         ]
@@ -98,11 +98,12 @@ def add_tmpdir(args: dict) -> bool:
 
     # set command to create the temporary folder
     args['preamble'].extend([
-        '\n# create and export the temporary directory',
+        '# create and export the temporary directory',
         'mkdir -p %s' % tmpdir,
         'export TMPDIR="%s"' % tmpdir,
         'echo Temporary directory is ${TMPDIR}'
     ])
+    args['clear'].append('rm -rf ${TMPDIR}')
     return True
 
 
