@@ -208,7 +208,7 @@ def move_to(args: dict, path: str, is_folder: bool) -> None:
     if path not in set(args['exclude']):
         args['mkdir'].add('mkdir -p %s' % dirname(remote_to))
         args['move_to'].add('rsync -aqru %s %s' % (local, remote_to))
-        args['move_from'].add('rsync -aqru %s %s' % (remote_from, local))
+        args['move_from'].add('rsync -aqru %s %s' % (remote_from, path))
 
 
 def get_min_paths(in_out: dict, included: set) -> dict:
