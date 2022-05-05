@@ -11,6 +11,27 @@ import sys
 from os.path import abspath, exists, isfile
 
 
+def get_abspath(term_: str) -> str:
+    """Get the absolute path of an existing path but keep the trailing
+    slash if it was present in the relative / user-defined path (can be
+    needed for command such as rsync).
+
+    Parameters
+    ----------
+    term_ : str
+        A path
+
+    Returns
+    -------
+    term : str
+        The abspath of the path
+    """
+    term = abspath(term_)
+    if term_.endswith('/'):
+        term += '/'
+    return term
+
+
 def check_term(args: dict, term_: str) -> str:
     """If the term is a character string starting with an alphanumeric
     character, then check here whether it is an existing file/folder not yet
@@ -37,7 +58,7 @@ def check_term(args: dict, term_: str) -> str:
     if term_ in args['executables']:
         term = term_
     elif exists(term_):
-        term = abspath(term_)
+        term = get_abspath(term_)
     else:
         term = term_
     return term
@@ -67,7 +88,7 @@ def get_term(args: dict, tdx: int, term_: str) -> str:
         if tdx == 0 or re.match('[a-zA-Z0-9]', term_):
             term = check_term(args, term_)
         elif exists(term_):
-            term = abspath(term_)
+            term = get_abspath(term_)
         else:
             term = term_
     return term
