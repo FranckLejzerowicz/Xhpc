@@ -222,7 +222,7 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                     colon_separated = []
                     for term_ in colon_terms:
                         # Get the term (an abspath if it is an existing path)
-                        if not args['abs']:
+                        if args['abs']:
                             term = get_term(args, tdx, term_)
                         else:
                             term = term_
