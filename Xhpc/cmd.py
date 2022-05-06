@@ -200,6 +200,8 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                 Input script path (or double-quoted command)
             executables : set
                 Conda and global paths executables
+            abs : bool
+                Change the existing paths in command line to absolute paths
     paths : set
         Paths to file or folders to move when using scratch folder
     commands : list
@@ -220,7 +222,10 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                     colon_separated = []
                     for term_ in colon_terms:
                         # Get the term (an abspath if it is an existing path)
-                        term = get_term(args, tdx, term_)
+                        if not args['abs']:
+                            term = get_term(args, tdx, term_)
+                        else:
+                            term = term_
                         # If them found as being an absolute path
                         if term.startswith('/'):
                             # Add term to set of paths

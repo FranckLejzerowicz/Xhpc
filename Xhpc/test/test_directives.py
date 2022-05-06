@@ -84,7 +84,7 @@ class TestConda(unittest.TestCase):
         self.assertEqual(exp, obs)
 
         self.args['nnodes'] = 2
-        exp = '#SBATCH --nodes=2'
+        exp = '#SBATCH --nodes=2\n#SBATCH --ntasks-per-node=1'
         obs = set_nodes(self.args)
         self.assertEqual(exp, obs)
 
@@ -103,12 +103,12 @@ class TestConda(unittest.TestCase):
 
     def test_set_nodes_names(self):
         self.args['nodes'] = ('a', 'b', 'c',)
-        exp = '#SBATCH --nodelist=a,b,c'
+        exp = '#SBATCH --nodelist=a,b,c\n#SBATCH --ntasks-per-node=1'
         obs = set_nodes(self.args)
         self.assertEqual(exp, obs)
 
         self.args['torque'] = True
-        exp = '#PBS -l nodes=a,b,c'
+        exp = '#PBS -l nodes=a,b,c\n#PBS -l ppn=1'
         obs = set_nodes(self.args)
         self.assertEqual(exp, obs)
 
@@ -156,9 +156,6 @@ class TestConda(unittest.TestCase):
     # def test_get_directives(self):
     #     obs = get_directives(self.args)
     #     self.assertEqual(exp, obs)
-
-    def test_check_directives(self):
-        check_directives()
 
 
 if __name__ == '__main__':

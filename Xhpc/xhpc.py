@@ -81,6 +81,8 @@ def xhpc(**args) -> None:
                 Run the job output script
             move : bool
                 Move files/folders to chosen scratch location
+            abs : bool
+                Change the existing paths in command line to absolute paths
             verif: bool
                 Print script to stdout and query user for sanity
             stat: bool
