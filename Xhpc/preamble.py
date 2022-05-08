@@ -135,6 +135,8 @@ def add_echoes(args: dict) -> None:
     ----------
     args : dict
         All arguments. Here only the following keys are of interest:
+            input_fp : str
+                Input script path (or double-quoted command)
             workdir: str
                 Working directory
             torque: bool
@@ -150,6 +152,7 @@ def add_echoes(args: dict) -> None:
     stdout = 'echo Job stdout is %s' % args['std_path'],
     stderr = 'echo Job stderr is %s' % args['std_path']
     args['preamble'].extend(['%s.out' % stdout, '%s.err' % stderr])
+    args['preamble'].append('echo Job script: %s' % args['input_fp'])
 
 
 def get_preamble(args: dict) -> None:
