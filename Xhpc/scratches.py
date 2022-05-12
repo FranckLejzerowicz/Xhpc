@@ -7,7 +7,6 @@
 # ----------------------------------------------------------------------------
 import os
 from os.path import isfile
-import pkg_resources as pr
 from Xhpc.io_utils import get_first_line
 
 
@@ -155,4 +154,4 @@ def write_scratches(scratch_fp: str, scratch_folder: str) -> None:
         o.write('%s\n' % scratch_folder)
     print('Written: %s' % scratch_fp)
     if scratch_folder == '${USERWORK}':
-        print('(written automatically since your machine presets USERNAME)')
+        print('Written automatically since your machine presets $USERNAME')
