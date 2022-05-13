@@ -177,14 +177,12 @@ def set_stdout_stderr(args: dict) -> str:
         std_path = 'localhost:%s_${%s}' % (work_dir, job_id)
         directive = '#PBS -o %s.out\n#PBS -e %s.err' % (std_path, std_path)
     else:
-        work_dir = '${SLURM_SUBMIT_DIR}/${SLURM_JOB_NAME}'
+        work_dir = '${SLURM_SUBMIT_DIR}'
         if args['workdir']:
-            work_dir = '%s/${SLURM_SUBMIT_DIR}' % abspath(args['workdir'])
+            work_dir = abspath(args['workdir'])
         job_id = 'SLURM_JOB_ID'
-        # std_path = '%s_${%s}' % (work_dir, job_id)
-        std_path = '${SLURM_SUBMIT_DIR}/slurm-${%s}' % job_id
-        # directive = '#SBATCH -o %s.o\n#SBATCH -e %s.e' % (std_path, std_path)
-        directive = None
+        std_path = '%s/slurm-%sx_%sj' % (work_dir, '%', '%')
+        directive = '#SBATCH -o %s.o\n#SBATCH -e %s.e' % (std_path, std_path)
     args['std_path'] = std_path
     args['job_id'] = job_id
     return directive
