@@ -109,7 +109,7 @@ def xhpc(**args) -> None:
     if args['show_config']:
         show_config(args, config_fp)
     else:
-        sys_exit()
+        sys_exit(args)
         get_email_address(args, config_fp)  # get email address
         get_scratches(args, config_dir)  # get paths to scratch folders
         get_sinfo_pd(args, '%s/.sinfo' % expanduser('~'))  # get sinfo node usage
