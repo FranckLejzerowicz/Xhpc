@@ -29,9 +29,9 @@ def add_env(args: dict) -> None:
     if args['env']:
         # activate the env
         env = [
-            '\n     # active conda environment',
+            '\n# active conda environment',
             'echo "Conda environment is %s"' % args['env'],
-            'source activate %s' % args['env']
+            'conda activate %s' % args['env']
         ]
         args['preamble'].extend(env)
 
