@@ -51,15 +51,17 @@ def get_conda_path(env: str) -> str:
     return path
 
 
-def get_conda_executables(env: str) -> set:
+def get_conda_executables(args: dict) -> set:
     """Get the basename of all executables present in the bin folder of the
     conda environment that the job will run in, in order for these
     executables not be affected by scratch/localscratch transfers.
 
     Parameters
     ----------
-    env : str
-        Conda environment to run the job
+    args : dict
+        All arguments
+        env : str
+            Conda environment to run the job
 
     Returns
     -------
@@ -67,10 +69,10 @@ def get_conda_executables(env: str) -> set:
         Set of executables
     """
     conda_executables = set()
-    if env:
-        path = get_conda_path(env)
+    if args['env']:
+        args['env'] = get_conda_path(args['env'])
         conda_executables.update(
-            [basename(x) for x in glob.glob('%s/bin/*' % path)])
+            [basename(x) for x in glob.glob('%s/bin/*' % args['env'])])
     return conda_executables
 
 
@@ -114,5 +116,5 @@ def get_executables(args: dict) -> None:
         All arguments
     """
     executables = get_path_executables()
-    executables.update(get_conda_executables(args['env']))
+    executables.update(get_conda_executables(args))
     args['executables'] = executables

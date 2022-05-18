@@ -23,7 +23,6 @@ def add_env(args: dict) -> None:
         '# general environment info / behaviour',
         'uname -a',  # Show some machine specs for reproducibility
         'set -e',    # Exit the script on any error
-        'set -u',    # Treat any unset variables as an error
     ]
     # if a conda environment is used
     if args['env']:
@@ -31,6 +30,10 @@ def add_env(args: dict) -> None:
         env = [
             '\n# active conda environment',
             'echo "Conda environment is %s"' % args['env'],
+            'module load Anaconda3/2019.03',
+            'export PS1=\\$',
+            'source ${EBROOTANACONDA3}/etc/profile.d/conda.sh',
+            'conda deactivate &>/dev/null',
             'conda activate %s' % args['env']
         ]
         args['preamble'].extend(env)
