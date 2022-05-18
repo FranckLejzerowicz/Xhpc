@@ -14,13 +14,13 @@ from Xhpc import __version__
 
 @click.command()
 @click.option(
-    "-i", "--i-script", required=True, nargs=1,
+    "-i", "--i-script", default=None, nargs=1,
     help="Input script path (or double-quoted command)")
 @click.option(
     "-o", "--o-script", default=None, type=str,
     help="Output script path (default to <input>_<YYYY-MM-DD-HH-MM-SS>.slm)")
 @click.option(
-    "-j", "--i-job", required=True, type=str, help="Job name")
+    "-j", "--i-job", default=None, type=str, help="Job name")
 @click.option(
     "-a", "--p-account", default=None, type=str, help="Name of the account")
 @click.option(
@@ -117,6 +117,9 @@ from Xhpc import __version__
 @click.option(
     "--allocate/--no-allocate", default=False, show_default=True,
     help="Get current machine usage (sinfo) to allocate suitable nodes/memory")
+@click.option(
+    "--show-config/--no-show-config", default=False, show_default=True,
+    help="Show current configurations (email and scratches)")
 @click.version_option(__version__, prog_name="Xhpc")
 
 
@@ -154,7 +157,8 @@ def standalone_xhpc(
         config_email,
         config_scratch,
         sinfo,
-        allocate
+        allocate,
+        show_config
 ):
 
     xhpc(
@@ -191,7 +195,8 @@ def standalone_xhpc(
         config_email=config_email,
         config_scratch=config_scratch,
         sinfo=sinfo,
-        allocate=allocate
+        allocate=allocate,
+        show_config=show_config
     )
 
 

@@ -394,3 +394,60 @@ def write_out(args: dict) -> None:
             o.write('\n')
         o.write('echo "Done!"\n')
         print('Written:', args['job_fp'])
+
+
+def show_config(args: dict, config_fp: str) -> None:
+    """
+
+    Parameters
+    ----------
+    args : dict
+        All arguments. Here only the following key is of interest:
+        scratch: str
+            Path to scratch folder (to move files and compute)
+        userscratch: str
+            Path to user scratch folder (to move files and compute)
+        email_address : str
+            email address of the user.
+    config_fp : str
+        Path to the file that may (or not) contains an email address
+    """
+    if isfile(config_fp):
+        print('* email address config file:',
+              subprocess.getoutput('cat %s' % config_fp))
+    else:
+        print('Email address config not yet created')
+        sys.exit(1)
+
+    for scratch in ['scratch', 'userscratch']:
+        if args[scratch]:
+            scratch_fp = config_fp.replace('config.txt', '%s.txt' % scratch)
+            if isfile(scratch_fp):
+                print('* %s folder config file:' % scratch,
+                      subprocess.getoutput('cat %s' % scratch_fp))
+            else:
+                print('%s config not created (run Xhpc using `--%s`)' % (
+                    scratch, scratch))
+                sys.exit(1)
+
+
+def sys_exit(args: dict):
+    """Quit if some arguments are not passed by user.
+    Note that these could be set using required=True in the click options,
+    but this is not suited to letting this tools reach the show_config().
+
+    Parameters
+    ----------
+    args : dict
+        All arguments, including:
+            input_fp : str
+                Input script path (or double-quoted command)
+            job: str
+                Job name
+    """
+    if not args['input_fp']:
+        print('Option "-i" (or "--i-script") is mandatory')
+        sys.exit(0)
+    if not args['job']:
+        print('Option "-j" (or "--i-job") is mandatory')
+        sys.exit(0)
