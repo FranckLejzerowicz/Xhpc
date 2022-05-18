@@ -112,7 +112,7 @@ def xhpc(**args) -> None:
         sys_exit(args)
         get_email_address(args, config_fp)  # get email address
         get_scratches(args, config_dir)  # get paths to scratch folders
-        get_sinfo_pd(args, '%s/.sinfo' % expanduser('~'))  # get sinfo node usage
+        get_sinfo_pd(args, '%s/.sinfo' % expanduser('~'))  # get node usage
         get_job_fp(args)  # get path of output job file
         get_output_dir(args)  # get absolute path of the output directory
         get_executables(args)  # get set of executables in current environment
