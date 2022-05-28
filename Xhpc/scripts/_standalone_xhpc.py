@@ -120,6 +120,9 @@ from Xhpc import __version__
 @click.option(
     "--show-config/--no-show-config", default=False, show_default=True,
     help="Show current configurations (email and scratches)")
+@click.option(
+    "--quiet/--no-quiet", default=False, show_default=True,
+    help="Do not print anything")
 @click.version_option(__version__, prog_name="Xhpc")
 
 
@@ -158,7 +161,8 @@ def standalone_xhpc(
         config_scratch,
         sinfo,
         allocate,
-        show_config
+        show_config,
+        quiet
 ):
 
     xhpc(
@@ -196,7 +200,8 @@ def standalone_xhpc(
         config_scratch=config_scratch,
         sinfo=sinfo,
         allocate=allocate,
-        show_config=show_config
+        show_config=show_config,
+        quiet=quiet
     )
 
 

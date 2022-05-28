@@ -393,7 +393,8 @@ def write_out(args: dict) -> None:
                 o.write('# ------ %s END ------\n' % part)
             o.write('\n')
         o.write('echo "Done!"\n')
-        print('Written:', args['job_fp'])
+        if not args['quiet']:
+            print('Written:', args['job_fp'])
 
 
 def show_config(args: dict, config_fp: str) -> None:

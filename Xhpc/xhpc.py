@@ -102,6 +102,8 @@ def xhpc(**args) -> None:
                 Get current machine usage to allocate suitable nodes/memory
             show_config : bool
                 Show current configurations (email and scratches)
+            quiet : bool
+                Do not print anything
     """
     init_args(args)
     config_dir = '%s/user' % pkg_res.resource_filename("Xhpc", "")
@@ -125,5 +127,6 @@ def xhpc(**args) -> None:
         check_content(args)  # print-based, visual checks
         write_out(args)
         if args['run']:
-            print('Launched command: /bin/sh %s' % args['job_fp'])
+            if not args['quiet']:
+                print('Launched command: /bin/sh %s' % args['job_fp'])
             subprocess.call(['qsub', args['job_fp']])
