@@ -277,8 +277,8 @@ def get_tmpdir(args: dict) -> bool:
     if args['tmp']:
         tmpdir = args['tmp'].rstrip('/')
     elif args['move']:
-        # if this is set, then there will be a SCRATCH_DIR folder created
-        tmpdir = '${SCRATCH_DIR}/tmpdir'
+        # if this is set, then there will be a SCRATCH_FOLDER folder created
+        tmpdir = '${SCRATCH_FOLDER}/tmpdir'
     elif 'TMPDIR' in os.environ:
         tmpdir = '${TMPDIR}'
     else:

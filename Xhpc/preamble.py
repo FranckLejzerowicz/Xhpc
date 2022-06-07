@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import os
+from os.path import abspath
 
 
 def add_env(args: dict) -> None:
@@ -86,8 +87,8 @@ def add_tmpdir(args: dict) -> bool:
     if args['tmp']:
         tmpdir = args['tmp'].rstrip('/')
     elif args['move']:
-        # if this is set, then there will be a SCRATCH_DIR folder created
-        tmpdir = '${SCRATCH_DIR}/tmpdir'
+        # if this is set, then there will be a SCRATCH_FOLDER folder created
+        tmpdir = '${SCRATCH_FOLDER}/tmpdir'
     elif 'TMPDIR' in os.environ:
         tmpdir = '${TMPDIR}'
     else:
@@ -155,7 +156,7 @@ def add_echoes(args: dict) -> None:
     stdout = 'echo Job stdout is %s' % args['std_path'],
     stderr = 'echo Job stderr is %s' % args['std_path']
     args['preamble'].extend(['%s.out' % stdout, '%s.err' % stderr])
-    args['preamble'].append('echo Job script: %s' % args['input_fp'])
+    args['preamble'].append('echo Job script: %s' % abspath(args['input_fp']))
 
 
 def get_preamble(args: dict) -> None:

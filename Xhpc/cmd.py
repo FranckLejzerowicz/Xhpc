@@ -222,7 +222,7 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                     colon_separated = []
                     for term_ in colon_terms:
                         # Get the term (an abspath if it is an existing path)
-                        if args['abs']:
+                        if args['abspath']:
                             term = get_term(args, tdx, term_)
                         else:
                             term = term_
@@ -232,7 +232,7 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                             paths.add(term)
                             # Use it in command from scratch area if requested
                             if args['move'] and term not in args['exclude']:
-                                term = '${SCRATCH_DIR}%s' % term
+                                term = '${SCRATCH_FOLDER}%s' % term
                         colon_separated.append(term)
                     comma_separated.append(':'.join(colon_separated))
                 quote_part.append(','.join(comma_separated))
@@ -252,14 +252,19 @@ def parse_script(args: dict) -> None:
         All arguments. Here only the following keys are of interest:
             input_fp : str
                 Input script path (or double-quoted command)
+            abspath : bool
+                Parse command and change existing paths to abspath
     """
     paths = set()
     commands = list()
     with open(args['input_fp']) as f:
         # for each command of the script
         for line_ in f:
-            # collect abspath for existing files/folders or keep words as is
-            parse_line(line_.strip(), args, paths, commands)
+            if args['abspath'] or args['move']:
+                # collect abspath for existing files/folders or keep words as is
+                parse_line(line_.strip(), args, paths, commands)
+            else:
+                commands.append(line_)
     args['commands'] = commands
     args['paths'] = paths
 

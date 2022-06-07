@@ -70,7 +70,7 @@ from Xhpc import __version__
     "--move/--no-move", default=False, show_default=True,
     help="Move files/folders to chosen scratch location")
 @click.option(
-    "--abs/--no-abs", default=True, show_default=True,
+    "--abspath/--no-abspath", default=True, show_default=True,
     help="Change the existing paths in command line to absolute paths")
 @click.option(
     "-l", "--localscratch", type=int, show_default=False, default=None,
@@ -152,7 +152,7 @@ def standalone_xhpc(
         email,
         run,
         move,
-        abs,
+        abspath,
         verif,
         stat,
         gpu,
@@ -191,7 +191,7 @@ def standalone_xhpc(
         email=email,
         run=run,
         move=move,
-        abs=abs,
+        abspath=abspath,
         verif=verif,
         stat=stat,
         gpu=gpu,

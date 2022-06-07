@@ -89,10 +89,10 @@ def get_scratching_commands(args: dict) -> None:
     scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
     # Get commands to create and more to scratch directory
     args['scratching'].append('# Define and create a scratch directory')
-    args['scratching'].append('SCRATCH_DIR="%s"' % scratch_path)
-    args['scratching'].append('mkdir -p ${SCRATCH_DIR}')
-    args['scratching'].append('cd ${SCRATCH_DIR}')
-    args['scratching'].append('echo Working directory is ${SCRATCH_DIR}')
+    args['scratching'].append('SCRATCH_FOLDER="%s"' % scratch_path)
+    args['scratching'].append('mkdir -p ${SCRATCH_FOLDER}')
+    args['scratching'].append('cd ${SCRATCH_FOLDER}')
+    args['scratching'].append('echo Working directory is ${SCRATCH_FOLDER}')
 
 
 def get_in_out(paths: set) -> dict:
@@ -204,7 +204,7 @@ def get_include_commands(args: dict) -> set:
                 continue
             folder = os.path.abspath(folder_)
             included.add(folder)
-            scratch = '${SCRATCH_DIR}%s' % folder
+            scratch = '${SCRATCH_FOLDER}%s' % folder
             args['mkdir'].add('mkdir -p %s' % dirname(scratch))
             args['move_to'].add('rsync -aqru %s/ %s' % (folder, scratch))
             args['move_from'].add('rsync -aqru %s/ %s' % (scratch, folder))
@@ -224,11 +224,11 @@ def move_to(args: dict, path: str, is_folder: bool) -> None:
         Whether the path is a folder (True) or a file (False)
     """
     local = path
-    remote_from = '${SCRATCH_DIR}%s' % path
+    remote_from = '${SCRATCH_FOLDER}%s' % path
     if is_folder:
         local += '/'
-        remote_from = '${SCRATCH_DIR}%s/' % path
-    remote_to = '${SCRATCH_DIR}%s' % path
+        remote_from = '${SCRATCH_FOLDER}%s/' % path
+    remote_to = '${SCRATCH_FOLDER}%s' % path
     if path not in set(args['exclude']):
         args['mkdir'].add('mkdir -p %s' % dirname(remote_to))
         args['move_to'].add('rsync -aqru %s %s' % (local, remote_to))
@@ -287,7 +287,7 @@ def get_out_commands(args: dict, in_out: dict) -> None:
         of non-existing paths that will be move back.
     """
     for path in in_out['out']:
-        source = '${SCRATCH_DIR}%s' % path
+        source = '${SCRATCH_FOLDER}%s' % path
         args['move_from'].update([
             'if [ -d %s ]; then mkdir -p %s; rsync -aqru %s/ %s; fi' % (
                 source, path, source, path),
@@ -332,10 +332,10 @@ def get_clearing_commands(args: dict):
         # Get commands to move away and delete scratch directory
         if args['torque']:
             args['clear'].append('cd ${PBS_O_WORKDIR}')
-            args['clear'].append('rm -rf ${SCRATCH_DIR}')
+            args['clear'].append('rm -rf ${SCRATCH_FOLDER}')
         else:
             args['clear'].append('cd ${SLURM_SUBMIT_DIR}')
-            args['clear'].append('rm -rf ${SCRATCH_DIR}')
+            args['clear'].append('rm -rf ${SCRATCH_FOLDER}')
 
 
 def go_to_work(args: dict) -> None:
