@@ -370,6 +370,8 @@ def write_out(args: dict) -> None:
                 Commands composing the actual job
             stat: bool
                 Whether to prepend `/usr/bin/time -v` to every script command
+            quiet : bool
+                Do not print anything
     """
     with open(args['job_fp'], 'w') as o:
         for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',

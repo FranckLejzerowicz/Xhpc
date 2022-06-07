@@ -11,6 +11,33 @@ import os
 from os.path import dirname, isdir, isfile
 
 
+def print_scratch_message(args, scratch_path):
+    """
+
+    Parameters
+    ----------
+    args : dict
+        All arguments, including:
+            quiet : bool
+                Do not print anything
+    scratch_path : str
+        Either of "scratch", "userscratch" or "localscratch"
+
+    Returns
+    -------
+    message : str
+        Message about scratch
+    """
+    message = ''
+    if not args['quiet']:
+        message = 'Creating scratch location "%s" ' % scratch_path
+        if args['move']:
+            message += "and moving files to/from for computing."
+        else:
+            message += 'but not using it (need to set "--move" too)'
+    return message
+
+
 def get_scratch_path(args: dict) -> str:
     """Get the path to the scratch folder to use to move and compute.
     If the use activate more than one of the three scratch arguments, then the
@@ -37,6 +64,7 @@ def get_scratch_path(args: dict) -> str:
     """
     for scratch_path in ['localscratch', 'scratch', 'userscratch']:
         if args[scratch_path]:
+            print_scratch_message(args, scratch_path)
             scratch_val = args[scratch_path]
             return scratch_val
 
@@ -57,18 +85,14 @@ def get_scratching_commands(args: dict) -> None:
             torque: bool
                 Adapt to Torque
     """
-    if args['scratch'] or args['userscratch'] or args['localscratch']:
-        # Define scratch directory
-        scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
-        # Get commands to create and more to scratch directory
-        args['scratching'].append('# Define and create a scratch directory')
-        args['scratching'].append('SCRATCH_DIR="%s"' % scratch_path)
-        args['scratching'].append('mkdir -p ${SCRATCH_DIR}')
-        args['scratching'].append('cd ${SCRATCH_DIR}')
-        args['scratching'].append('echo Working directory is ${SCRATCH_DIR}')
-    else:
-        raise IOError('Must specify `--scratch`, `--userscratch` or '
-                      '`--localscratch to use `--move`')
+    # Define scratch directory
+    scratch_path = '%s/${%s}' % (get_scratch_path(args), args['job_id'])
+    # Get commands to create and more to scratch directory
+    args['scratching'].append('# Define and create a scratch directory')
+    args['scratching'].append('SCRATCH_DIR="%s"' % scratch_path)
+    args['scratching'].append('mkdir -p ${SCRATCH_DIR}')
+    args['scratching'].append('cd ${SCRATCH_DIR}')
+    args['scratching'].append('echo Working directory is ${SCRATCH_DIR}')
 
 
 def get_in_out(paths: set) -> dict:
@@ -251,26 +275,17 @@ def get_in_commands(args: dict, min_paths: dict) -> None:
         move_to(args, min_file, False)
 
 
-def get_out_commands(args: dict, min_paths: dict, in_out: dict) -> None:
+def get_out_commands(args: dict, in_out: dict) -> None:
     """Get command that move the inputs in and outputs out.
 
     Parameters
     ----------
     args : dict
         All arguments.
-    min_paths : dict
-        Minimum set of existing folders to contain all folders passed in
-        command (key "folders") and files not present with the minimum set of
-        folders (key "files")
     in_out : dict
         Sets of existing files and folder that will be moved in and
         of non-existing paths that will be move back.
     """
-    # for folder in min_paths['folders']:
-    #     source = '${SCRATCH_DIR}%s' % folder
-    #     if folder not in set(args['exclude']):
-    #         args['mkdir'].add('mkdir -p %s' % source)
-    #         args['move_from'].add('rsync -aqru %s/ %s' % (source, folder))
     for path in in_out['out']:
         source = '${SCRATCH_DIR}%s' % path
         args['move_from'].update([
@@ -292,15 +307,13 @@ def get_relocating_commands(args: dict) -> None:
     """
     # Folders to move to and from scratch
     included = get_include_commands(args)
-
-    # Get paths to existing folders and files, and non-existing ones (outputs?)
+    # Get paths to existing folders and files, and non-existing ones
     in_out = get_in_out(args['paths'])
     min_paths = get_min_paths(in_out, included)
-
     # Move in to scratch
     get_in_commands(args, min_paths)
     # Move out from scratch
-    get_out_commands(args, min_paths, in_out)
+    get_out_commands(args, in_out)
 
 
 def get_clearing_commands(args: dict):
@@ -356,11 +369,14 @@ def get_relocation(args: dict) -> None:
             move : bool
                 Move files/folders to chosen scratch location
     """
-    if args['move']:
+    if args['scratch'] or args['userscratch'] or args['localscratch']:
         # Get scratch folder creation and deletion commands
         get_scratching_commands(args)
-        # Get command that move the inputs in and outputs out
-        get_relocating_commands(args)
+        if args['move']:
+            # Get command that move the inputs in and outputs out
+            get_relocating_commands(args)
+        else:
+            go_to_work(args)
         # Get command that clear the scratch location
         get_clearing_commands(args)
     else:
