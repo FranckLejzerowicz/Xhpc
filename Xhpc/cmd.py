@@ -222,7 +222,9 @@ def parse_line(line_: str, args: dict, paths: set, commands: list) -> None:
                     colon_separated = []
                     for term_ in colon_terms:
                         # Get the term (an abspath if it is an existing path)
-                        if args['abspath']:
+                        if term_.startswith('${SCRATCH_FOLDER}'):
+                            term = term_
+                        elif args['abspath']:
                             term = get_term(args, tdx, term_)
                         else:
                             term = term_
