@@ -121,6 +121,9 @@ from Xhpc import __version__
     "--show-config/--no-show-config", default=False, show_default=True,
     help="Show current configurations (email and scratches)")
 @click.option(
+    "--saga/--no-saga", default=False, show_default=True,
+    help="Import conda env as specified on sigma2/SAGA documentation.")
+@click.option(
     "--quiet/--no-quiet", default=False, show_default=True,
     help="Do not print anything")
 @click.version_option(__version__, prog_name="Xhpc")
@@ -162,6 +165,7 @@ def standalone_xhpc(
         sinfo,
         allocate,
         show_config,
+        saga,
         quiet
 ):
 
@@ -201,6 +205,7 @@ def standalone_xhpc(
         sinfo=sinfo,
         allocate=allocate,
         show_config=show_config,
+        saga=saga,
         quiet=quiet
     )
 
