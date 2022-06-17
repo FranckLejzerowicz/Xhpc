@@ -181,8 +181,9 @@ def set_stdout_stderr(args: dict) -> str:
         if args['workdir']:
             work_dir = abspath(args['workdir'])
         job_id = 'SLURM_JOB_ID'
-        std_path = 'slurm-%sx_%sj' % ('%', '%')
-        directive = '#SBATCH -o %s.o\n#SBATCH -e %s.e' % (std_path, std_path)
+        std_path_ = 'slurm-%sx_%sj' % ('%', '%')
+        std_path = 'slurm-${SLURM_JOB_NAME}_${SLURM_JOB_ID}'
+        directive = '#SBATCH -o %s.o\n#SBATCH -e %s.e' % (std_path_, std_path_)
     args['std_path'] = std_path
     args['job_id'] = job_id
     return directive
