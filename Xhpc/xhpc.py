@@ -6,6 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import os
 import subprocess
 from os.path import expanduser
 import pkg_resources as pkg_res
@@ -106,7 +107,8 @@ def xhpc(**args) -> None:
                 Do not print anything
     """
     init_args(args)
-    config_dir = '%s/user' % pkg_res.resource_filename("Xhpc", "")
+    config_dir = '%s/user/%s' % (pkg_res.resource_filename("Xhpc", ""),
+                                 os.environ['USER'])
     config_fp = '%s/config.txt' % config_dir
     if args['show_config']:
         show_config(args, config_fp)
