@@ -61,10 +61,10 @@ from Xhpc import __version__
     "-w", "--p-workdir", default=None, show_default=True,
     help="Working directory to use instead of $SLURM_SUBMIT_DIR")
 @click.option(
-    "-y", "--p-include", multiple=True, default=None, show_default=True,
+    "-y", "--p-include", multiple=True, default=(), show_default=True,
     help="Folder to not move to and from scratch using rsync (must exist)")
 @click.option(
-    "-x", "--p-exclude", multiple=True, default=None, show_default=True,
+    "-x", "--p-exclude", multiple=True, default=(), show_default=True,
     help="Relative path(s) within input folder(s) to not move in scratch")
 @click.option(
     "--move/--no-move", default=False, show_default=True,
@@ -81,9 +81,6 @@ from Xhpc import __version__
 @click.option(
     "--userscratch/--no-userscratch", default=False, show_default=True,
     help="Use the userscratch folder to move files and compute")
-@click.option(
-    "--clear-scratch/--no-clear-scratch", default=True, show_default=True,
-    help="Whether to cleat the scratch area at the end of the job or not")
 @click.option(
     "--stdout/--no-stdout", default=True, show_default=True,
     help="Rename stdout (and stderr) with job name and ID")
@@ -150,7 +147,6 @@ def standalone_xhpc(
         localscratch,
         scratch,
         userscratch,
-        clear_scratch,
         stdout,
         email,
         run,
@@ -189,7 +185,6 @@ def standalone_xhpc(
         scratch=scratch,
         localscratch=localscratch,
         userscratch=userscratch,
-        clear_scratch=clear_scratch,
         workdir=p_workdir,
         stdout=stdout,
         email=email,
