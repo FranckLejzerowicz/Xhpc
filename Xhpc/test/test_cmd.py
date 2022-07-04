@@ -17,6 +17,9 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.args = {
             'executables': {'exe'},
+            'abspath': True,
+            'exclude': (),
+            'include': (),
             'move': False
         }
         self.path = './test_check_term.txt'
@@ -151,8 +154,9 @@ class Test(unittest.TestCase):
         self.args['move'] = True
         line_simple_path = 'exe -i /in -o /out'
         parse_line(line_simple_path, self.args, self.paths, self.commands)
-        self.assertEqual(['exe -i ${SCRATCH_DIR}/in -o ${SCRATCH_DIR}/out'],
-                         self.commands)
+        self.assertEqual([
+            'exe -i ${SCRATCH_FOLDER}/in -o ${SCRATCH_FOLDER}/out'],
+            self.commands)
         self.assertEqual(self.paths, {'/in', '/out'})
 
     def test_parse_line_exists(self):
@@ -166,8 +170,9 @@ class Test(unittest.TestCase):
         self.args['move'] = True
         line = 'name -i "/a,/b" -o /x,/y:/1:/2'
         parse_line(line, self.args, self.paths, self.commands)
-        out = 'name -i "${SCRATCH_DIR}/a,${SCRATCH_DIR}/b" -o ${SCRATCH_DIR}'
-        out += '/x,${SCRATCH_DIR}/y:${SCRATCH_DIR}/1:${SCRATCH_DIR}/2'
+        out = 'name -i "${SCRATCH_FOLDER}/a,${SCRATCH_FOLDER}/b" ' \
+              '-o ${SCRATCH_FOLDER}'
+        out += '/x,${SCRATCH_FOLDER}/y:${SCRATCH_FOLDER}/1:${SCRATCH_FOLDER}/2'
         exp = [out]
         self.assertEqual(exp, self.commands)
         self.assertEqual(self.paths, {'/a', '/b', '/x', '/y', '/1', '/2'})
@@ -176,8 +181,8 @@ class Test(unittest.TestCase):
         self.args['move'] = True
         line_exists = 'exe -i test_parse_line_in -o test_parse_line_out'
         parse_line(line_exists, self.args, self.paths, self.commands)
-        exp = [
-            'exe -i ${SCRATCH_DIR}%s -o test_parse_line_out' % self.abspath_fp]
+        exp = ['exe -i ${SCRATCH_FOLDER}%s '
+               '-o test_parse_line_out' % self.abspath_fp]
         self.assertEqual(exp, self.commands)
         self.assertEqual(self.paths, {self.abspath_fp})
 
@@ -209,8 +214,8 @@ class Test(unittest.TestCase):
         self.args['input_fp'] = self.line_exists_fp
         self.args['move'] = True
         get_commands(self.args)
-        exp = [
-            'exe -i ${SCRATCH_DIR}%s -o test_parse_line_out' % self.abspath_fp]
+        exp = ['exe -i ${SCRATCH_FOLDER}%s '
+               '-o test_parse_line_out' % self.abspath_fp]
         self.assertEqual(exp, self.args['commands'])
         self.assertEqual(self.args['paths'], {self.abspath_fp})
 

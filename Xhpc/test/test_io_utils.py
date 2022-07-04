@@ -297,6 +297,7 @@ class TestWriteOut(unittest.TestCase):
             'clear': set(),
             'move': False,
             'stat': False,
+            'quiet': False
         }
 
     def test_write_out(self):

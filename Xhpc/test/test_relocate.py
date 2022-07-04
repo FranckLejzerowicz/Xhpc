@@ -25,7 +25,9 @@ class TestGetNodesPpn(unittest.TestCase):
             'move_from': set(),
             'move_to': set(),
             'mkdir': set(),
-            'clear': []
+            'clear': [],
+            'move': True,
+            'quiet': False
         }
         self.test_folder = pkg_resources.resource_filename("Xhpc", "test")
         self.folder_of_not_existing = self.test_folder
@@ -90,30 +92,30 @@ class TestGetNodesPpn(unittest.TestCase):
         self.args['localscratch'] = '/localscratch:10GB'
         get_scratching_commands(self.args)
         exp = ['# Define and create a scratch directory',
-               'SCRATCH_DIR="/localscratch:10GB/${X}"',
-               'mkdir -p ${SCRATCH_DIR}',
-               'cd ${SCRATCH_DIR}',
-               'echo Working directory is ${SCRATCH_DIR}']
+               'SCRATCH_FOLDER="/localscratch:10GB/${X}"',
+               'mkdir -p ${SCRATCH_FOLDER}',
+               'cd ${SCRATCH_FOLDER}',
+               'echo Working directory is ${SCRATCH_FOLDER}']
         self.assertEqual(exp, self.args['scratching'])
 
     def test_get_scratching_commands_user(self):
         self.args['userscratch'] = '/some/path'
         get_scratching_commands(self.args)
         exp = ['# Define and create a scratch directory',
-               'SCRATCH_DIR="/some/path/${X}"',
-               'mkdir -p ${SCRATCH_DIR}',
-               'cd ${SCRATCH_DIR}',
-               'echo Working directory is ${SCRATCH_DIR}']
+               'SCRATCH_FOLDER="/some/path/${X}"',
+               'mkdir -p ${SCRATCH_FOLDER}',
+               'cd ${SCRATCH_FOLDER}',
+               'echo Working directory is ${SCRATCH_FOLDER}']
         self.assertEqual(exp, self.args['scratching'])
 
     def test_get_scratching_commands(self):
         self.args['scratch'] = '/some/path'
         get_scratching_commands(self.args)
         exp = ['# Define and create a scratch directory',
-               'SCRATCH_DIR="/some/path/${X}"',
-               'mkdir -p ${SCRATCH_DIR}',
-               'cd ${SCRATCH_DIR}',
-               'echo Working directory is ${SCRATCH_DIR}']
+               'SCRATCH_FOLDER="/some/path/${X}"',
+               'mkdir -p ${SCRATCH_FOLDER}',
+               'cd ${SCRATCH_FOLDER}',
+               'echo Working directory is ${SCRATCH_FOLDER}']
         self.assertEqual(exp, self.args['scratching'])
 
     def test_get_in_out(self):
@@ -150,8 +152,8 @@ class TestGetNodesPpn(unittest.TestCase):
         self.assertEqual(exp, obs)
 
     def test_get_include_commands(self):
-        obs = get_include_commands(self.args)
         exp = set()
+        obs = get_include_commands(self.args)
         self.assertEqual(exp, obs)
 
         self.args['include'] = ('./a', './1/2/3',)
@@ -164,11 +166,11 @@ class TestGetNodesPpn(unittest.TestCase):
         obs = get_include_commands(self.args)
         self.assertEqual({path}, obs)
         path_dir = dirname(path)
-        exp = {'mkdir -p ${SCRATCH_DIR}%s' % path_dir}
+        exp = {'mkdir -p ${SCRATCH_FOLDER}%s' % path_dir}
         self.assertEqual(exp, self.args['mkdir'])
-        exp = {'rsync -aqru %s/ ${SCRATCH_DIR}%s' % (path, path)}
+        exp = {'rsync -aqru %s/ ${SCRATCH_FOLDER}%s' % (path, path)}
         self.assertEqual(exp, self.args['move_to'])
-        exp = {'rsync -aqru ${SCRATCH_DIR}%s/ %s' % (path, path)}
+        exp = {'rsync -aqru ${SCRATCH_FOLDER}%s/ %s' % (path, path)}
         self.assertEqual(exp, self.args['move_from'])
         os.rmdir('./a')
 

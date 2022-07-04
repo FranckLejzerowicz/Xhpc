@@ -57,17 +57,5 @@ class TestGetNodelist(unittest.TestCase):
         self.assertEqual(exp, obs)
 
 
-# class TestAllocateNodes(unittest.TestCase):
-#
-#     def setUp(self) -> None:
-#         pass
-#
-#     def test_allocate_nodes(self):
-#         allocate_nodes()
-#
-#     def tearDown(self) -> None:
-#         pass
-
-
 if __name__ == '__main__':
     unittest.main()

@@ -14,12 +14,12 @@ class TestAddEnv(unittest.TestCase):
 
     def setUp(self):
         self.env = 'conda_env'
-        self.args = {'env': None}
-        self.preamble_cmd = ['\n# general environment info / behaviour',
-                             'uname -a', 'set -e', 'set -u']
+        self.args = {'env': None, 'saga': False}
+        self.preamble_cmd = ['# general environment info / behaviour',
+                             'uname -a', 'set -e']
         self.env_cmd = ['\n# active conda environment',
                         'echo "Conda environment is %s"' % self.env,
-                        'source activate %s' % self.env]
+                        'conda activate %s' % self.env]
 
     def test_add_env_none(self):
         add_env(self.args)
@@ -70,7 +70,7 @@ class TestAddTmpdir(unittest.TestCase):
         os.environ = {}
         self.args = {
             'tmp': False, 'move': False, 'torque': False,
-            'job': '{A}', 'preamble': []}
+            'job': '{A}', 'preamble': [], 'clear': []}
         self.tmpdir_passed = '/any/path'
         self.tmpdir_move = '${SCRATCH_DIR}/tmpdir'
         self.tmpdir_os = '${TMPDIR}'
@@ -82,9 +82,11 @@ class TestAddTmpdir(unittest.TestCase):
         self.args['tmp'] = self.tmpdir_passed
         self.tmpdir_passed += '/' + self.args['job'] + '_${SLURM_JOB_ID}'
         exp = [
-            '\n# create and export the temporary directory',
+            '# create and export the temporary directory',
             'mkdir -p %s' % self.tmpdir_passed,
-            'export TMPDIR="%s"' % self.tmpdir_passed]
+            'export TMPDIR="%s"' % self.tmpdir_passed,
+            'echo Temporary directory is ${TMPDIR}'
+        ]
         add_tmpdir(self.args)
         self.assertEqual(exp, self.args['preamble'])
 
@@ -93,9 +95,11 @@ class TestAddTmpdir(unittest.TestCase):
         self.args['torque'] = True
         self.tmpdir_passed += '/' + self.args['job'] + '_${PBS_JOBID}'
         exp = [
-            '\n# create and export the temporary directory',
+            '# create and export the temporary directory',
             'mkdir -p %s' % self.tmpdir_passed,
-            'export TMPDIR="%s"' % self.tmpdir_passed]
+            'export TMPDIR="%s"' % self.tmpdir_passed,
+            'echo Temporary directory is ${TMPDIR}'
+        ]
         add_tmpdir(self.args)
         self.assertEqual(exp, self.args['preamble'])
 
@@ -103,9 +107,11 @@ class TestAddTmpdir(unittest.TestCase):
         self.args['tmp'] = self.tmpdir_move
         self.tmpdir_move += '/' + self.args['job'] + '_${SLURM_JOB_ID}'
         exp = [
-            '\n# create and export the temporary directory',
+            '# create and export the temporary directory',
             'mkdir -p %s' % self.tmpdir_move,
-            'export TMPDIR="%s"' % self.tmpdir_move]
+            'export TMPDIR="%s"' % self.tmpdir_move,
+            'echo Temporary directory is ${TMPDIR}'
+        ]
         add_tmpdir(self.args)
         self.assertEqual(exp, self.args['preamble'])
 
@@ -114,9 +120,11 @@ class TestAddTmpdir(unittest.TestCase):
         self.args['torque'] = True
         self.tmpdir_move += '/' + self.args['job'] + '_${PBS_JOBID}'
         exp = [
-            '\n# create and export the temporary directory',
+            '# create and export the temporary directory',
             'mkdir -p %s' % self.tmpdir_move,
-            'export TMPDIR="%s"' % self.tmpdir_move]
+            'export TMPDIR="%s"' % self.tmpdir_move,
+            'echo Temporary directory is ${TMPDIR}'
+        ]
         add_tmpdir(self.args)
         self.assertEqual(exp, self.args['preamble'])
 
@@ -124,9 +132,11 @@ class TestAddTmpdir(unittest.TestCase):
         os.environ['TMPDIR'] = 1
         self.tmpdir_os += '/' + self.args['job'] + '_${SLURM_JOB_ID}'
         exp = [
-            '\n# create and export the temporary directory',
+            '# create and export the temporary directory',
             'mkdir -p %s' % self.tmpdir_os,
-            'export TMPDIR="%s"' % self.tmpdir_os]
+            'export TMPDIR="%s"' % self.tmpdir_os,
+            'echo Temporary directory is ${TMPDIR}'
+        ]
         add_tmpdir(self.args)
         self.assertEqual(exp, self.args['preamble'])
 
@@ -135,9 +145,11 @@ class TestAddTmpdir(unittest.TestCase):
         self.args['torque'] = True
         self.tmpdir_os += '/' + self.args['job'] + '_${PBS_JOBID}'
         exp = [
-            '\n# create and export the temporary directory',
+            '# create and export the temporary directory',
             'mkdir -p %s' % self.tmpdir_os,
-            'export TMPDIR="%s"' % self.tmpdir_os]
+            'export TMPDIR="%s"' % self.tmpdir_os,
+            'echo Temporary directory is ${TMPDIR}'
+        ]
         add_tmpdir(self.args)
         self.assertEqual(exp, self.args['preamble'])
 
@@ -146,45 +158,47 @@ class TestAddProcsNodes(unittest.TestCase):
 
     def setUp(self):
         self.args = {'torque': False, 'preamble': []}
-        self.slurm = '$SLURM_JOB_NODELIST'
-        self.torque = '$PBS_NODEFILE'
 
     def test_add_procs_nodes_slurm(self):
         add_procs_nodes(self.args)
-        exp = ['NPROCS=`wc -l < %s`' % self.slurm,
-               'NNODES=`uniq %s | wc -l`' % self.slurm]
+        exp = ['NPROCS=${SLURM_NTASKS}', 'NNODES=${SLURM_NNODES}',
+               'echo Use ${NPROCS} procs on ${NNODES} nodes']
         self.assertEqual(exp, self.args['preamble'])
 
     def test_add_procs_nodes_torque(self):
         self.args['torque'] = True
         add_procs_nodes(self.args)
-        exp = ['NPROCS=`wc -l < %s`' % self.torque,
-               'NNODES=`uniq %s | wc -l`' % self.torque]
+        exp = ['NPROCS=`wc -l < ${PBS_NODEFILE}`',
+               'NNODES=`uniq ${PBS_NODEFILE} | wc -l`',
+               'echo Use ${NPROCS} procs on ${NNODES} nodes']
         self.assertEqual(exp, self.args['preamble'])
 
 
 class TestAddEchoes(unittest.TestCase):
 
     def setUp(self):
-        self.args = {'torque': False, 'preamble': [], 'std_path': 'X'}
+        self.args = {'torque': False, 'preamble': [],
+                     'std_path': 'X', 'input_fp': '/path'}
         self.part1 = ['\n# echo some info about the job',
                       'echo Running on host `hostname`',
-                      'echo Time is `date`', 'echo Directory is `pwd`']
-        self.slurm = ['NPROCS=`wc -l < $SLURM_JOB_NODELIST`',
-                      'NNODES=`uniq $SLURM_JOB_NODELIST | wc -l`']
-        self.torque = ['NPROCS=`wc -l < $PBS_NODEFILE`',
-                       'NNODES=`uniq $PBS_NODEFILE | wc -l`']
+                      'echo Time is `date`',
+                      'echo Directory is `pwd`']
+        self.slurm = ['NPROCS=${SLURM_NTASKS}',
+                      'NNODES=${SLURM_NNODES}']
+        self.torque = ['NPROCS=`wc -l < ${PBS_NODEFILE}`',
+                       'NNODES=`uniq ${PBS_NODEFILE} | wc -l`']
         self.part2 = ['echo Use ${NPROCS} procs on ${NNODES} nodes',
-                      'echo Job stdout is X.o', 'echo Job stderr is X.e']
+                      'echo Job stdout is X.out',
+                      'echo Job stderr is X.err']
 
     def test_add_echoes_notmp_slurm(self):
-        exp = self.part1 + self.slurm + self.part2
+        exp = self.part1 + self.slurm + self.part2 + ['echo Job script: /path']
         add_echoes(self.args)
         self.assertEqual(self.args['preamble'], exp)
 
     def test_add_echoes_notmp_torque(self):
         self.args['torque'] = True
-        exp = self.part1 + self.torque + self.part2
+        exp = self.part1 + self.torque + self.part2 + ['echo Job script: /path']
         add_echoes(self.args)
         self.assertEqual(self.args['preamble'], exp)
 
