@@ -266,8 +266,6 @@ def get_tmpdir(args: dict) -> bool:
         All arguments. Here only the following keys are of interest:
             tmp: str
                 Alternative temp folder
-            workdir: str
-                Working directory
             move : bool
                 Move files/folders to chosen scratch location
             torque: bool
@@ -374,7 +372,7 @@ def write_out(args: dict) -> None:
                 Do not print anything
     """
     with open(args['job_fp'], 'w') as o:
-        for part in ['directives', 'preamble', 'tmp', 'mkdir', 'scratching',
+        for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
                      'move_to', 'commands', 'move_from', 'clear']:
             if part not in args or not args[part]:
                 continue
