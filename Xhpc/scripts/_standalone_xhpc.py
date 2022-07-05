@@ -82,6 +82,9 @@ from Xhpc import __version__
     "--userscratch/--no-userscratch", default=False, show_default=True,
     help="Use the userscratch folder to move files and compute")
 @click.option(
+    "--clear-scratch/--no-clear-scratch", default=False, show_default=True,
+    help="Remove the (local/user)scratch folder at the end of the job")
+@click.option(
     "--stdout/--no-stdout", default=True, show_default=True,
     help="Rename stdout (and stderr) with job name and ID")
 @click.option(
@@ -147,6 +150,7 @@ def standalone_xhpc(
         localscratch,
         scratch,
         userscratch,
+        clear_scratch,
         stdout,
         email,
         run,
@@ -185,6 +189,7 @@ def standalone_xhpc(
         scratch=scratch,
         localscratch=localscratch,
         userscratch=userscratch,
+        clear_scratch=clear_scratch,
         workdir=p_workdir,
         stdout=stdout,
         email=email,
