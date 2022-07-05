@@ -338,22 +338,22 @@ def get_clearing_commands(args: dict):
             args['clear'].append('rm -rf ${SCRATCH_FOLDER}')
 
 
-def go_to_work(args: dict) -> None:
-    """Get the working folder to go to and echo.
-
-    Parameters
-    ----------
-    args : dict
-        All arguments, including:
-            torque: bool
-                Adapt to Torque
-    """
-    args['move_to'] = ['# Move to the working directory and say it']
-    work_dir = 'SLURM_SUBMIT_DIR'
-    if args['torque']:
-        work_dir = 'PBS_O_WORKDIR'
-    args['move_to'].append('cd $%s' % work_dir)
-    args['move_to'].append('echo Working directory is $%s' % work_dir)
+# def go_to_work(args: dict) -> None:
+#     """Get the working folder to go to and echo.
+#
+#     Parameters
+#     ----------
+#     args : dict
+#         All arguments, including:
+#             torque: bool
+#                 Adapt to Torque
+#     """
+#     args['move_to'] = ['# Move to the working directory and say it']
+#     work_dir = 'SLURM_SUBMIT_DIR'
+#     if args['torque']:
+#         work_dir = 'PBS_O_WORKDIR'
+#     args['move_to'].append('cd $%s' % work_dir)
+#     args['move_to'].append('echo Working directory is $%s' % work_dir)
 
 
 def get_relocation(args: dict) -> None:
@@ -375,10 +375,12 @@ def get_relocation(args: dict) -> None:
         if args['move']:
             # Get command that move the inputs in and outputs out
             get_relocating_commands(args)
-        else:
-            go_to_work(args)
+        # else:
+        #     go_to_work(args)
+
         # Get command that clear the scratch location
         get_clearing_commands(args)
-    else:
-        # Switch to working directory; default is home directory
-        go_to_work(args)
+
+    # else:
+    #      # Switch to working directory; default is home directory
+    #     go_to_work(args)

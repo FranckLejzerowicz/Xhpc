@@ -290,7 +290,7 @@ def get_tmpdir(args: dict) -> bool:
 
     # set command to create the temporary folder
     args['tmp'] = [
-        '\n# create and export the temporary directory',
+        '# create and export the temporary directory',
         'mkdir -p %s' % tmpdir,
         'export TMPDIR="%s"' % tmpdir,
         'echo Temporary directory is ${TMPDIR}']
