@@ -374,7 +374,7 @@ def write_out(args: dict) -> None:
                 Do not print anything
     """
     with open(args['job_fp'], 'w') as o:
-        for part in ['directives', 'preamble', 'scratching', 'tmp', 'mkdir',
+        for part in ['directives', 'preamble', 'tmp', 'mkdir', 'scratching',
                      'move_to', 'commands', 'move_from', 'clear']:
             if part not in args or not args[part]:
                 continue
