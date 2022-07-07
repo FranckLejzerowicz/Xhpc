@@ -61,10 +61,10 @@ from Xhpc import __version__
     "-w", "--p-workdir", default=None, show_default=True,
     help="Working directory to use instead of $SLURM_SUBMIT_DIR")
 @click.option(
-    "-y", "--p-include", multiple=True, default=(), show_default=True,
+    "-y", "--p-include", multiple=True, default=None, show_default=True,
     help="Folder to not move to and from scratch using rsync (must exist)")
 @click.option(
-    "-x", "--p-exclude", multiple=True, default=(), show_default=True,
+    "-x", "--p-exclude", multiple=True, default=None, show_default=True,
     help="Relative path(s) within input folder(s) to not move in scratch")
 @click.option(
     "--move/--no-move", default=False, show_default=True,

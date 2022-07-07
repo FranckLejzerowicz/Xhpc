@@ -27,6 +27,10 @@ def init_args(args: dict) -> None:
     args['move_to'] = set()
     args['move_from'] = set()
     args['clear'] = []
+    if not args['include']:
+        args['include'] = ()
+    if not args['exclude']:
+        args['exclude'] = ()
 
 
 def get_sinfo_pd(args: dict, sinfo_dir: str) -> None:
