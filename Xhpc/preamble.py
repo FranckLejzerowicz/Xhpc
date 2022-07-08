@@ -155,7 +155,7 @@ def add_echoes(args: dict) -> None:
     add_procs_nodes(args)
     stdout = 'echo Job stdout is %s' % args['std_path'],
     stderr = 'echo Job stderr is %s' % args['std_path']
-    args['preamble'].extend(['%s.out' % stdout, '%s.err' % stderr])
+    args['preamble'].extend(['%s.o' % stdout, '%s.e' % stderr])
     args['preamble'].append('echo Job script: %s' % abspath(args['input_fp']))
 
 
