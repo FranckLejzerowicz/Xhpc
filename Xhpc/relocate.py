@@ -90,6 +90,7 @@ def get_scratching_commands(args: dict) -> None:
     # Get commands to create and more to scratch directory
     args['scratching'].append('# Define and create a scratch directory')
     args['scratching'].append('SCRATCH_FOLDER="%s"' % scratch_path)
+    args['scratching'].append('export SCRATCH_FOLDER')
     args['scratching'].append('mkdir -p ${SCRATCH_FOLDER}')
     args['scratching'].append('cd ${SCRATCH_FOLDER}')
     args['scratching'].append('echo Working directory is ${SCRATCH_FOLDER}')
