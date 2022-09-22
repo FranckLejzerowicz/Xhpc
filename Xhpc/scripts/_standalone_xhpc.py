@@ -94,7 +94,7 @@ from Xhpc import __version__
     "--run/--no-run", default=False, show_default=True,
     help="Run the job before exiting (subprocess)")
 @click.option(
-    "--stat/--no-stat", default=True, show_default=True,
+    "--stat/--no-stat", default=False, show_default=True,
     help="Whether to prepend `/usr/bin/time -v` to every script command")
 @click.option(
     "--verif/--no-verif", default=False, show_default=True,
