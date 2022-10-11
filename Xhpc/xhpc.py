@@ -91,6 +91,8 @@ def xhpc(**args) -> None:
                 Whether to prepend `/usr/bin/time -v` to every script command
             gpu: bool
                 Query a gpu (experimental)
+            mpi : bool
+                Parallel distributed job, e.g. MPI: --ntasks not --cpus-per-task
             torque: bool
                 Adapt to Torque
             config_email: bool

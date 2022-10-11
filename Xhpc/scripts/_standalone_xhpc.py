@@ -103,6 +103,9 @@ from Xhpc import __version__
     "--gpu/--no-gpu", default=False, show_default=True,
     help="Query a gpu (experimental)")
 @click.option(
+    "--mpi/--no-mpi", default=False, show_default=True,
+    help="Parallel distributed job, e.g. MPI: --ntasks not --cpus-per-task")
+@click.option(
     "--torque/--no-torque", default=False, show_default=True,
     help="Adapt to Torque")
 @click.option(
@@ -159,6 +162,7 @@ def standalone_xhpc(
         verif,
         stat,
         gpu,
+        mpi,
         torque,
         config_email,
         config_scratch,
@@ -199,6 +203,7 @@ def standalone_xhpc(
         verif=verif,
         stat=stat,
         gpu=gpu,
+        mpi=mpi,
         torque=torque,
         config_email=config_email,
         config_scratch=config_scratch,
