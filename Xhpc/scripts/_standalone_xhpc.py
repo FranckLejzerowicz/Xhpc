@@ -25,7 +25,8 @@ from Xhpc import __version__
     "-a", "--p-account", default=None, type=str, help="Name of the account")
 @click.option(
     "-p", "--p-partition", default='normal', help="Partition name",
-    type=click.Choice(['normal', 'bigmem', 'accel', 'optimist']),)
+    # type=click.Choice(['normal', 'bigmem', 'accel', 'optimist']),)
+ )
 @click.option(
     "-n", "--p-nnodes", default=1, type=int,
     help="Number of nodes", show_default=True)
