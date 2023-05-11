@@ -32,7 +32,7 @@ def add_env(args: dict) -> None:
                'echo "Conda environment is %s"' % args['env']]
         if args['saga']:
             env.extend([
-                'module load Anaconda3/2019.03',
+                'module load Anaconda3/2022.10',
                 'export PS1=\\$',
                 'source ${EBROOTANACONDA3}/etc/profile.d/conda.sh',
                 'conda deactivate &>/dev/null'])
