@@ -39,7 +39,7 @@ def add_env(args: dict) -> None:
         else:
             env.append(
                 "source %s/miniconda3/etc/profile.d/conda.sh" % args[
-                    'env'].split("/miniconda3/")[-1])
+                    'env'].split("/miniconda3/")[0])
         env.append('conda activate %s' % args['env'])
         if args['saga']:
             env.append('module purge')
