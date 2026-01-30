@@ -36,7 +36,7 @@ def add_env(args: dict) -> None:
                 'export PS1=\\$',
                 'source ${EBROOTANACONDA3}/etc/profile.d/conda.sh',
                 'conda deactivate &>/dev/null'])
-        env.append('conda activate %s' % args['env'])
+        env.append('source activate %s' % args['env'])
         if args['saga']:
             env.append('module purge')
         args['preamble'].extend(env)
