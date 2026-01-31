@@ -286,7 +286,7 @@ def get_tmpdir(args: dict) -> bool:
     else:
         return None  # if no TMPDIR is set, keep the default machine behavior
 
-    tmpdir += '_' + args['job']
+    tmpdir += '/' + args['job']
     if args['torque']:
         tmpdir += '_${PBS_JOBID}'
     else:
