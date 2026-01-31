@@ -102,9 +102,9 @@ def add_tmpdir(args: dict) -> bool:
 
     tmpdir += '/' + args['job']
     if args['torque']:
-        tmpdir += '_${PBS_JOBID}'
+        tmpdir += '/${PBS_JOBID}'
     else:
-        tmpdir += '_${SLURM_JOB_ID}'
+        tmpdir += '/${SLURM_JOB_ID}'
 
     # set command to create the temporary folder
     args['preamble'].extend([
